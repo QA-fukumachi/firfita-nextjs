@@ -1,0 +1,111 @@
+{
+  "Global": {
+    "title": "Dubplate Cutting Service"
+  },
+  "Navbar": {
+    "home": "HOME",
+    "about": "ABOUT US",
+    "contact": "CONTACT US",
+    "pricing": "PRICING",
+    "orderNow": "ORDER NOW"
+  },
+  "Home": {
+    "heroSubtitle": "CUSTOM CUTTING SERVICE",
+    "startOrder": "START YOUR ORDER",
+    "sizes": {
+      "7": "7\"",
+      "10": "10\"",
+      "12": "12\""
+    },
+    "service": {
+      "title": "Who are Dubplates great for?",
+      "p1": "For DJs who want to play any track on vinyl, including unreleased music, in their vinyl-only sets.",
+      "p2": "For every music enthusiast who just want to have any musical piece in a physical form.",
+      "blocks": {
+        "oneOff": {
+          "title": "ONE-OFF COPY",
+          "desc": "We cut from one-off copy to short runs"
+        },
+        "fast": {
+          "title": "FAST TURNAROUND",
+          "desc": "5-10 days standard, 24-48h express"
+        },
+        "formats": {
+          "title": "ALL FORMATS",
+          "desc": "7\", 10\" and 12\" dubplates"
+        }
+      },
+      "viewAllServices": "VIEW ALL SERVICES"
+    },
+    "collab": {
+      "title": "COLLABORATIONS"
+    },
+    "about": {
+      "title": "ABOUT US",
+      "body": "We are music enthusiasts who live for records, grooves and the sound of a needle hitting wax. We cut vinyls. One-offs, dubplates, short runs. Your music, turned into a record you can actually spin. For DJs, producers, labels, anyone tired of their tracks living in a folder."
+    },
+    "contact": {
+      "title": "CONTACT US",
+      "email": "firfita@gmail.com",
+      "phone": "+599 599 00 00 00"
+    }
+  },
+  "Order": {
+    "title": "CONFIGURE YOUR DUBPLATE",
+    "step1": "1. CUSTOMER INFO",
+    "name": "First Name",
+    "lastName": "Last Name",
+    "phone": "Telephone Number",
+    "step2": "2. SIZE",
+    "sizeHint": "Choose your vinyl size",
+    "size7": {
+      "title": "7\" SINGLE",
+      "desc": "Perfect for singles, maximum music length on the side — 7 min.",
+      "price": "100 GEL"
+    },
+    "size10": {
+      "title": "10\" EP",
+      "desc": "Extended play format, maximum music length on each side — 11 min.",
+      "price": "100 GEL"
+    },
+    "size12": {
+      "title": "12\" LP",
+      "desc": "Full album experience, maximum music length on each side — 15 min.",
+      "price": "100 GEL"
+    },
+    "step3": "3. VINYL COLOR",
+    "colorRed": "Red",
+    "colorTransparent": "Transparent",
+    "colorBlack": "Black",
+    "step4": "4. CENTER STICKER",
+    "uploadSticker": "Upload your sticker artwork",
+    "downloadTemplate": "Download template",
+    "step5": "5. PACKAGING",
+    "customSleeve": "Custom outer sleeve",
+    "blankSleeve": "Blank",
+    "step6": "6. QUANTITY",
+    "summaryTitle": "TOTAL",
+    "submit": "SUBMIT ORDER"
+  },
+  "About": {
+    "title": "ABOUT US",
+    "p1": "We are music enthusiasts who live for records, grooves and the sound of a needle hitting wax.",
+    "p2": "We cut vinyls. One-offs, dubplates, short runs. Your music, turned into a record you can actually spin. For DJs, producers, labels, anyone tired of their tracks living in a folder."
+  },
+  "Contact": {
+    "title": "GET IN TOUCH",
+    "email": "firfita@gmail.com",
+    "phone": "+995 599 00 00 00",
+    "address": "Tbilisi, Georgia"
+  },
+  "Pricing": {
+    "title": "PRICING",
+    "desc": "Clear, straightforward pricing for high-quality dubplates.",
+    "sizes": "Sizes & Formats",
+    "extras": "Extras & Add-ons"
+  },
+  "Services": {
+    "title": "OUR SERVICES",
+    "desc": "Everything you need to press your music onto physical wax."
+  }
+}
