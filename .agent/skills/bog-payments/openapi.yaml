@@ -1,0 +1,177 @@
+openapi: 3.0.3
+info:
+  title: Bank of Georgia E-commerce API
+  version: "1.0"
+  description: OpenAPI specification for the BOG Payment Gateway standard process (auth, orders, callbacks).
+servers:
+  - url: https://api.bog.ge/payments/v1
+    description: BOG Payments API
+  - url: https://oauth2.bog.ge/auth/realms/bog/protocol/openid-connect
+    description: BOG Auth Server
+paths:
+  /token:
+    post:
+      summary: Get access token
+      operationId: getAccessToken
+      servers:
+        - url: https://oauth2.bog.ge/auth/realms/bog/protocol/openid-connect
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - grant_type
+              properties:
+                grant_type:
+                  type: string
+                  enum: [client_credentials]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                  expires_in:
+                    type: integer
+  /ecommerce/orders:
+    post:
+      summary: Create an order
+      operationId: createOrder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - callback_url
+                - purchase_units
+                - redirect_urls
+              properties:
+                callback_url:
+                  type: string
+                external_order_id:
+                  type: string
+                capture:
+                  type: string
+                  enum: [automatic, manual]
+                purchase_units:
+                  type: object
+                  required:
+                    - basket
+                    - total_amount
+                  properties:
+                    basket:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                          - product_id
+                          - quantity
+                          - unit_price
+                        properties:
+                          product_id:
+                            type: string
+                          quantity:
+                            type: integer
+                          unit_price:
+                            type: number
+                          description:
+                            type: string
+                    total_amount:
+                      type: number
+                    currency:
+                      type: string
+                      enum: [GEL, USD, EUR, GBP]
+                redirect_urls:
+                  type: object
+                  properties:
+                    success:
+                      type: string
+                    fail:
+                      type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The order_id
+                  _links:
+                    type: object
+                    properties:
+                      redirect:
+                        type: object
+                        properties:
+                          href:
+                            type: string
+  /receipt/{order_id}:
+    get:
+      summary: Get payment details
+      operationId: getPaymentDetails
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order_id:
+                    type: string
+                  order_status:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      value:
+                        type: string
+  /payment/refund/{order_id}:
+    post:
+      summary: Refund an order
+      operationId: refundOrder
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                  description: The amount to be refunded. If omitted, full amount is refunded.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  message:
+                    type: string
+                  action_id:
+                    type: string

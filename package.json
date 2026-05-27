@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "tbc:types": "openapi-typescript .agent/skills/tbc-payments/openapi.yaml -o src/lib/tbc/types.ts"
+    "tbc:types": "openapi-typescript .agent/skills/tbc-payments/openapi.yaml -o src/lib/tbc/types.ts",
+    "bog:types": "openapi-typescript .agent/skills/bog-payments/openapi.yaml -o src/lib/bog/types.ts"
   },
   "dependencies": {
     "next": "16.2.6",
