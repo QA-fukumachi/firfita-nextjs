@@ -41,7 +41,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${montserrat.variable} ${openSans.variable} h-full antialiased overflow-x-hidden`}
+      className={`${montserrat.variable} ${openSans.variable} h-full antialiased overflow-x-hidden scroll-smooth`}
     >
       <body className="min-h-full flex flex-col relative text-foreground overflow-x-hidden">
         <NextIntlClientProvider messages={messages}>

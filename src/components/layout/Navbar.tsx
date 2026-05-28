@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/src/i18n/routing';
+import { Link, usePathname } from '@/src/i18n/routing';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function Navbar() {
   const t = useTranslations('Navbar');
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
   const closeMenu = () => setIsOpen(false);
@@ -25,19 +26,19 @@ export function Navbar() {
         </Link>
 
         {/* Center Links (Desktop) */}
-        <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex gap-8 items-center text-sm tracking-widest font-display">
+        <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex gap-8 items-center text-sm font-bold tracking-widest font-display">
           <Link href="/" className="hover:text-accent-red transition-colors">{t('home')}</Link>
-          <Link href="/about" className="hover:text-accent-red transition-colors">{t('about')}</Link>
-          <Link href="/contact" className="hover:text-accent-red transition-colors">{t('contact')}</Link>
+          <Link href="/#about" className="hover:text-accent-red transition-colors">{t('about')}</Link>
+          <Link href="/#contact" className="hover:text-accent-red transition-colors">{t('contact')}</Link>
           <Link href="/pricing" className="hover:text-accent-red transition-colors">{t('pricing')}</Link>
         </div>
 
         {/* Right Actions (Desktop) */}
         <div className="hidden md:flex items-center gap-6">
-          <div className="flex gap-2 text-sm font-display">
-            <Link href="/" locale="en" className="hover:text-accent-red">EN</Link>
+          <div className="flex gap-2 text-sm font-bold font-display">
+            <Link href={pathname} locale="en" className="hover:text-accent-red">EN</Link>
             <span className="text-muted">/</span>
-            <Link href="/" locale="ka" className="hover:text-accent-red">KA</Link>
+            <Link href={pathname} locale="ka" className="hover:text-accent-red">KA</Link>
           </div>
           <Link 
             href="/order" 
@@ -64,11 +65,11 @@ export function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black flex flex-col items-center justify-center gap-8 font-display text-2xl tracking-widest"
+            className="fixed inset-0 z-40 bg-black flex flex-col items-center justify-center gap-8 font-display font-bold text-2xl tracking-widest"
           >
             <Link href="/" onClick={closeMenu} className="hover:text-accent-red transition-colors">{t('home')}</Link>
-            <Link href="/about" onClick={closeMenu} className="hover:text-accent-red transition-colors">{t('about')}</Link>
-            <Link href="/contact" onClick={closeMenu} className="hover:text-accent-red transition-colors">{t('contact')}</Link>
+            <Link href="/#about" onClick={closeMenu} className="hover:text-accent-red transition-colors">{t('about')}</Link>
+            <Link href="/#contact" onClick={closeMenu} className="hover:text-accent-red transition-colors">{t('contact')}</Link>
             <Link href="/pricing" onClick={closeMenu} className="hover:text-accent-red transition-colors">{t('pricing')}</Link>
             
             <Link 
@@ -79,10 +80,10 @@ export function Navbar() {
               {t('orderNow')}
             </Link>
 
-            <div className="flex gap-6 mt-8 text-xl text-gray-400">
-              <Link href="/" locale="en" onClick={closeMenu} className="hover:text-white transition-colors">EN</Link>
+            <div className="flex gap-6 mt-8 text-xl font-bold text-gray-400">
+              <Link href={pathname} locale="en" onClick={closeMenu} className="hover:text-white transition-colors">EN</Link>
               <span>/</span>
-              <Link href="/" locale="ka" onClick={closeMenu} className="hover:text-white transition-colors">KA</Link>
+              <Link href={pathname} locale="ka" onClick={closeMenu} className="hover:text-white transition-colors">KA</Link>
             </div>
           </motion.div>
         )}

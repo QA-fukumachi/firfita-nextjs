@@ -12,7 +12,14 @@ export default function Home() {
   const pathname = usePathname();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (window.location.hash) {
+      const el = document.querySelector(window.location.hash);
+      if (el) {
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 100);
+      }
+    } else {
+      window.scrollTo(0, 0);
+    }
   }, []);
 
   return (
@@ -165,7 +172,7 @@ export default function Home() {
       </section>
 
       {/* SECTION 4: ABOUT US */}
-      <section className="w-full border-b-2 border-white">
+      <section id="about" className="w-full border-b-2 border-white">
         <div className="max-w-4xl mx-auto py-32 px-6 text-center flex flex-col gap-8">
           <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-5xl xl:text-6xl tracking-tight uppercase break-words">{t('about.title')}</h2>
           <p className="text-2xl md:text-3xl leading-relaxed text-muted font-light">
@@ -175,7 +182,7 @@ export default function Home() {
       </section>
 
       {/* SECTION 5: CONTACT US */}
-      <section className="w-full py-32 px-6 bg-accent-red text-white text-center flex flex-col gap-8">
+      <section id="contact" className="w-full py-32 px-6 bg-accent-red text-white text-center flex flex-col gap-8">
         <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-5xl xl:text-6xl tracking-tight uppercase break-words">{t('contact.title')}</h2>
         <div className="flex flex-col gap-2 font-display text-2xl md:text-4xl lg:text-5xl tracking-widest break-words">
           <a href={`mailto:${t('contact.email')}`} className="hover:opacity-80 transition-opacity">{t('contact.email')}</a>
