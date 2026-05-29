@@ -93,6 +93,9 @@ export default function Home() {
               <p className="text-2xl md:text-3xl text-white leading-relaxed font-light border-l-4 border-white pl-6 py-2">
                 {t('service.p2')}
               </p>
+              <p className="text-2xl md:text-3xl text-white leading-relaxed font-light border-l-4 border-white pl-6 py-2">
+                {t('service.p3')}
+              </p>
             </div>
           </motion.div>
 
