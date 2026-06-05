@@ -479,7 +479,7 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: {
+            requestBody: {
                 content: {
                     /**
                      * @example {
@@ -560,7 +560,7 @@ export interface paths {
                 };
                 cookie?: never;
             };
-            requestBody?: {
+            requestBody: {
                 content: {
                     /**
                      * @example {
@@ -603,15 +603,15 @@ export interface components {
             shipping?: number;
         };
         PaymentResponse: {
-            payId?: string;
+            payId: string;
             /** @enum {string} */
-            status?: "Created" | "Processing" | "Succeeded" | "Failed";
-            links?: {
-                uri?: string;
+            status: "Created" | "Processing" | "Succeeded" | "Failed";
+            links: {
+                uri: string;
                 /** @enum {string} */
-                method?: "GET" | "POST" | "REDIRECT";
+                method: "GET" | "POST" | "REDIRECT";
                 /** @enum {string} */
-                rel?: "self" | "approval_url";
+                rel: "self" | "approval_url";
             }[];
             transactionId?: string | null;
             httpStatusCode?: number;

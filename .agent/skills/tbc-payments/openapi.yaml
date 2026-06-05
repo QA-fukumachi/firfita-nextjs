@@ -25,6 +25,10 @@ components:
           type: number
     PaymentResponse:
       type: object
+      required:
+        - payId
+        - status
+        - links
       properties:
         payId:
           type: string
@@ -35,6 +39,10 @@ components:
           type: array
           items:
             type: object
+            required:
+              - uri
+              - method
+              - rel
             properties:
               uri:
                 type: string
@@ -667,6 +675,7 @@ paths:
 
         * 500 - internal server error
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -753,6 +762,7 @@ paths:
         - default
       summary: web-complete-payment
       requestBody:
+        required: true
         content:
           application/json:
             schema:

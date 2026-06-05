@@ -73,7 +73,49 @@ export interface paths {
         trace?: never;
     };
 }
-export type webhooks = Record<string, never>;
+export interface webhooks {
+    order_payment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Callback from BOG when payment status changes */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        event: "order_payment";
+                    };
+                };
+            };
+            responses: {
+                /** @description Acknowledged */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+}
 export interface components {
     schemas: never;
     responses: never;
@@ -107,9 +149,9 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        access_token?: string;
-                        token_type?: string;
-                        expires_in?: number;
+                        access_token: string;
+                        token_type: string;
+                        expires_in: number;
                     };
                 };
             };
@@ -122,7 +164,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: {
+        requestBody: {
             content: {
                 "application/json": {
                     callback_url: string;
@@ -133,9 +175,11 @@ export interface operations {
                         basket: {
                             product_id: string;
                             quantity: number;
+                            /** @description Amount in major units (e.g., GEL, not tetri) */
                             unit_price: number;
                             description?: string;
                         }[];
+                        /** @description Amount in major units (e.g., GEL, not tetri) */
                         total_amount: number;
                         /** @enum {string} */
                         currency?: "GEL" | "USD" | "EUR" | "GBP";
@@ -156,10 +200,10 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @description The order_id */
-                        id?: string;
-                        _links?: {
-                            redirect?: {
-                                href?: string;
+                        id: string;
+                        _links: {
+                            redirect: {
+                                href: string;
                             };
                         };
                     };
@@ -185,9 +229,10 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        order_id?: string;
-                        order_status?: {
-                            key?: string;
+                        order_id: string;
+                        order_status: {
+                            /** @enum {string} */
+                            key: "created" | "processing" | "completed" | "rejected";
                             value?: string;
                         };
                     };
@@ -207,7 +252,7 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** @description The amount to be refunded. If omitted, full amount is refunded. */
+                    /** @description The amount to be refunded. If omitted, full amount is refunded. Amount in major units (e.g., GEL, not tetri) */
                     amount?: number;
                 };
             };

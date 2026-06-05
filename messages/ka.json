@@ -74,12 +74,28 @@
       "desc": "სრული ალბომი, მაქსიმალური ხანგრძლივობა - 15 წთ.",
       "price": "100 GEL"
     },
+    "sizetest1": {
+      "title": "TEST 1 GEL",
+      "desc": "სატესტო პროდუქტი 1 ლარად",
+      "price": "1 GEL"
+    },
+    "sizetest15": {
+      "title": "TEST 1.50 GEL",
+      "desc": "სატესტო პროდუქტი 1.50 ლარად",
+      "price": "1.50 GEL"
+    },
+    "sizetest05": {
+      "title": "TEST 0.50 GEL",
+      "desc": "სატესტო პროდუქტი 0.50 ლარად",
+      "price": "0.50 GEL"
+    },
     "step3": "3. ფერი",
     "colorRed": "წითელი",
     "colorTransparent": "გამჭვირვალე",
     "colorBlack": "შავი",
     "step4": "4. ცენტრალური სტიკერი",
-    "uploadSticker": "ატვირთე სტიკერის დიზაინი",
+    "pasteLink": "ჩასვი სტიკერის დიზაინის ლინკი (WeTransfer, Google Drive...)",
+    "stickerFormatInfo": "დიზაინი უნდა იყოს JPEG / PNG / PDF ფორმატში.",
     "downloadTemplate": "გადმოწერე შაბლონი",
     "step5": "5. შეფუთვა",
     "customSleeve": "ბეჭდვითი ყდა",

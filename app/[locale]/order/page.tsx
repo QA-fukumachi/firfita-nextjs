@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-type Size = '7' | '10' | '12' | null;
+type Size = '7' | '10' | '12' | 'test1' | 'test15' | 'test05' | null;
 type Color = 'Red' | 'Transparent' | 'Black' | null;
 
 export default function OrderPage() {
@@ -14,10 +14,14 @@ export default function OrderPage() {
   const [packaging, setPackaging] = useState<'blank' | 'custom'>('blank');
   const [quantity, setQuantity] = useState<number | string>(1);
   const [info, setInfo] = useState({ name: '', lastName: '', phone: '' });
+  const [stickerLink, setStickerLink] = useState('');
 
   const calculateTotal = () => {
     let total = 0;
-    if (size) total += 100;
+    if (size === '7' || size === '10' || size === '12') total += 100;
+    else if (size === 'test1') total += 1;
+    else if (size === 'test15') total += 1.5;
+    else if (size === 'test05') total += 0.5;
     const qty = typeof quantity === 'number' ? quantity : (parseInt(quantity) || 1);
     return total * qty;
   };
@@ -68,7 +72,7 @@ export default function OrderPage() {
           <section className="flex flex-col gap-6">
             <h2 className="font-display text-xl font-bold tracking-widest text-black">{t('step2')} <span className="text-sm lowercase font-body font-normal tracking-normal">({t('sizeHint')})</span></h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {(['7', '10', '12'] as Size[]).map((s) => (
+              {(['7', '10', '12', 'test1', 'test15', 'test05'] as Size[]).map((s) => (
                 <div 
                   key={s!}
                   onClick={() => setSize(s)}
@@ -112,18 +116,23 @@ export default function OrderPage() {
           {/* STEP 4: CENTER STICKER */}
           <section className="flex flex-col gap-6">
              <h2 className="font-display text-xl font-bold tracking-widest text-black">{t('step4')}</h2>
-             <div className="border-2 border-dashed border-gray-300 bg-gray-50 p-8 md:p-16 flex flex-col items-center justify-center text-center gap-4 hover:border-black transition-colors cursor-pointer">
-                <span className="font-display tracking-widest text-xl md:text-2xl">{t('uploadSticker')}</span>
-                <span className="text-sm text-gray-500">JPEG / PNG / PDF (Max 5MB)</span>
-                <button className="mt-4 text-sm font-bold underline hover:text-accent-red">{t('downloadTemplate')}</button>
+             <div className="flex flex-col gap-2">
+               <input 
+                 type="text" 
+                 placeholder={t('pasteLink')}
+                 value={stickerLink}
+                 onChange={e => setStickerLink(e.target.value)}
+                 className="bg-transparent border-b border-gray-300 py-3 outline-none focus:border-black transition-all text-base w-full placeholder-gray-400"
+               />
+               <p className="text-sm text-gray-500 mt-2">{t('stickerFormatInfo')} <button className="font-bold underline hover:text-accent-red ml-1">{t('downloadTemplate')}</button></p>
              </div>
           </section>
 
         </div>
 
         {/* RIGHT: STICKY SUMMARY PANEL */}
-        <div className="w-full lg:w-80">
-          <div className="relative lg:sticky top-auto lg:top-32 p-6 bg-black text-white flex flex-col gap-6 shadow-2xl">
+        <div className="w-full lg:w-80 lg:sticky lg:top-32 self-start transition-all duration-500 ease-in-out z-10">
+          <div className="p-6 bg-black text-white flex flex-col gap-6 shadow-2xl rounded-xl">
              
              <div className="flex flex-col gap-3">
                 <h3 className="font-display text-lg font-bold tracking-widest">{t('step6')}</h3>

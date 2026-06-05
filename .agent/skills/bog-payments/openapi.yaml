@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Bank of Georgia E-commerce API
   version: "1.0"
@@ -8,11 +8,17 @@ servers:
     description: BOG Payments API
   - url: https://oauth2.bog.ge/auth/realms/bog/protocol/openid-connect
     description: BOG Auth Server
+
+security:
+  - bearerAuth: []
+
 paths:
   /token:
     post:
       summary: Get access token
       operationId: getAccessToken
+      security:
+        - basicAuth: []
       servers:
         - url: https://oauth2.bog.ge/auth/realms/bog/protocol/openid-connect
       requestBody:
@@ -33,6 +39,10 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - access_token
+                  - token_type
+                  - expires_in
                 properties:
                   access_token:
                     type: string
@@ -45,6 +55,7 @@ paths:
       summary: Create an order
       operationId: createOrder
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -82,10 +93,12 @@ paths:
                             type: integer
                           unit_price:
                             type: number
+                            description: Amount in major units (e.g., GEL, not tetri)
                           description:
                             type: string
                     total_amount:
                       type: number
+                      description: Amount in major units (e.g., GEL, not tetri)
                     currency:
                       type: string
                       enum: [GEL, USD, EUR, GBP]
@@ -103,15 +116,22 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - id
+                  - _links
                 properties:
                   id:
                     type: string
                     description: The order_id
                   _links:
                     type: object
+                    required:
+                      - redirect
                     properties:
                       redirect:
                         type: object
+                        required:
+                          - href
                         properties:
                           href:
                             type: string
@@ -132,14 +152,20 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - order_id
+                  - order_status
                 properties:
                   order_id:
                     type: string
                   order_status:
                     type: object
+                    required:
+                      - key
                     properties:
                       key:
                         type: string
+                        enum: [created, processing, completed, rejected]
                       value:
                         type: string
   /payment/refund/{order_id}:
@@ -160,7 +186,7 @@ paths:
               properties:
                 amount:
                   type: number
-                  description: The amount to be refunded. If omitted, full amount is refunded.
+                  description: The amount to be refunded. If omitted, full amount is refunded. Amount in major units (e.g., GEL, not tetri)
       responses:
         "200":
           description: OK
@@ -175,3 +201,32 @@ paths:
                     type: string
                   action_id:
                     type: string
+
+webhooks:
+  order_payment:
+    post:
+      summary: Callback from BOG when payment status changes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - event
+              properties:
+                event:
+                  type: string
+                  enum: [order_payment]
+      responses:
+        "200":
+          description: Acknowledged
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    bearerAuth:
+      type: http
+      scheme: bearer
