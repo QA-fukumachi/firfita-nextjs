@@ -6,3 +6,5 @@ export default createMiddleware(routing);
 export const config = {
   matcher: ['/', '/(ka|en)/:path*']
 };
+
+export const runtime = 'experimental-edge';
