@@ -1,8 +1,0 @@
-name = "firfita-nextjs"
-compatibility_date = "2024-03-20"
-compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".vercel/output/static"
-
-[[kv_namespaces]]
-binding = "ORDERS_KV"
-id = "replace-with-your-kv-id-from-dashboard"
