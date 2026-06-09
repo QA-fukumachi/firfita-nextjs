@@ -18,6 +18,8 @@ const openSans = Open_Sans({
   subsets: ["latin"],
 });
 
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title: "Dubplate Cutting Service",
   description: "Custom vinyl cutting from one-off to short runs.",

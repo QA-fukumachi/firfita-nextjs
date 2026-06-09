@@ -13,8 +13,11 @@ export default function OrderPage() {
   const [color, setColor] = useState<Color>(null);
   const [packaging, setPackaging] = useState<'blank' | 'custom'>('blank');
   const [quantity, setQuantity] = useState<number | string>(1);
-  const [info, setInfo] = useState({ name: '', lastName: '', phone: '' });
+  const [info, setInfo] = useState({ name: '', lastName: '', phone: '', email: '' });
   const [stickerLink, setStickerLink] = useState('');
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const calculateTotal = () => {
     let total = 0;
@@ -24,6 +27,52 @@ export default function OrderPage() {
     else if (size === 'test05') total += 0.5;
     const qty = typeof quantity === 'number' ? quantity : (parseInt(quantity) || 1);
     return total * qty;
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setSubmitResult(null);
+
+    const payload = {
+      access_key: "45e0a590-f72c-4d94-95a3-5f9cafeb5e91",
+      subject: "New Order Submission - Firfita",
+      "First Name": info.name,
+      "Last Name": info.lastName,
+      "Email": info.email,
+      "Phone": info.phone,
+      "Size": size,
+      "Color": color,
+      "Quantity": quantity,
+      "Sticker Link": stickerLink || "None provided",
+      "Total Price": calculateTotal() + " GEL"
+    };
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      if (response.status === 200) {
+        setSubmitResult({ success: true, message: "Order placed successfully!" });
+        // Optional: clear form after success
+        setInfo({ name: '', lastName: '', phone: '', email: '' });
+        setSize(null);
+        setColor(null);
+        setStickerLink('');
+        setQuantity(1);
+      } else {
+        setSubmitResult({ success: false, message: result.message || "Something went wrong" });
+      }
+    } catch (error) {
+      setSubmitResult({ success: false, message: "Network error, please try again." });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const images = {
@@ -59,11 +108,18 @@ export default function OrderPage() {
                 className="bg-transparent border-b border-gray-300 py-3 outline-none focus:border-black transition-all text-base placeholder-gray-400"
               />
               <input 
+                type="email" 
+                placeholder={t('email') || "Email Address"}
+                value={info.email}
+                onChange={e => setInfo({...info, email: e.target.value})}
+                className="bg-transparent border-b border-gray-300 py-3 outline-none focus:border-black transition-all text-base placeholder-gray-400"
+              />
+              <input 
                 type="tel" 
                 placeholder={t('phone')}
                 value={info.phone}
                 onChange={e => setInfo({...info, phone: e.target.value})}
-                className="bg-transparent border-b border-gray-300 py-3 outline-none focus:border-black transition-all text-base md:col-span-2 placeholder-gray-400"
+                className="bg-transparent border-b border-gray-300 py-3 outline-none focus:border-black transition-all text-base placeholder-gray-400"
               />
             </div>
           </section>
@@ -176,11 +232,17 @@ export default function OrderPage() {
              </div>
 
              <button 
-               disabled={!size || !color || !info.name || !info.phone}
+               onClick={handleSubmit}
+               disabled={!size || !color || !info.name || !info.phone || !info.email.includes('@') || isSubmitting}
                className="w-full py-6 mt-4 bg-white text-black font-display font-bold tracking-widest text-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent-red hover:text-white transition-all transform hover:scale-[1.02] active:scale-95"
              >
-                {t('submit')}
+                {isSubmitting ? 'SUBMITTING...' : t('submit')}
              </button>
+             {submitResult && (
+               <div className={`mt-4 text-center p-3 font-bold text-sm rounded ${submitResult.success ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                 {submitResult.message}
+               </div>
+             )}
           </div>
         </div>
 

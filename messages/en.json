@@ -56,6 +56,7 @@
     "step1": "1. CUSTOMER INFO",
     "name": "First Name",
     "lastName": "Last Name",
+    "email": "Email Address",
     "phone": "Telephone Number",
     "step2": "2. SIZE",
     "sizeHint": "Choose your vinyl size",
