@@ -63,12 +63,12 @@
     "size7": {
       "title": "7\" SINGLE",
       "desc": "იდეალურია სინგლებისთვის, მაქსიმალური ხანგრძლივობა - 7 წთ.",
-      "price": "100 GEL"
+      "price": "55 GEL"
     },
     "size10": {
       "title": "10\" EP",
       "desc": "EP ფორმატი, მაქსიმალური ხანგრძლივობა - 11 წთ.",
-      "price": "100 GEL"
+      "price": "80 GEL"
     },
     "size12": {
       "title": "12\" LP",
@@ -94,14 +94,20 @@
     "colorRed": "წითელი",
     "colorTransparent": "გამჭვირვალე",
     "colorBlack": "შავი",
-    "step4": "4. ცენტრალური სტიკერი",
+    "stepOuterSleeve": "4. ვინილის ყდა",
+    "outerSleeveOption": "ვინილის ყდა",
+    "addToOrder": "დამატება",
+    "added": "დამატებულია",
+    "step4": "5. ცენტრალური სტიკერი",
+    "defaultSticker": "Firfita სტანდარტული სტიკერი",
+    "customSticker": "სტიკერი — შენი დიზაინით",
     "pasteLink": "ჩასვი სტიკერის დიზაინის ლინკი (WeTransfer, Google Drive...)",
     "stickerFormatInfo": "დიზაინი უნდა იყოს JPEG / PNG / PDF ფორმატში.",
     "downloadTemplate": "გადმოწერე შაბლონი",
     "step5": "5. შეფუთვა",
     "customSleeve": "ბეჭდვითი ყდა",
     "blankSleeve": "ცარიელი",
-    "step6": "6. რაოდენობა",
+    "step6": "6. DUBPLATE რაოდენობა",
     "summaryTitle": "ჯამი",
     "submit": "შეკვეთა"
   },

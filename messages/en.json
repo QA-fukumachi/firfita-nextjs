@@ -63,12 +63,12 @@
     "size7": {
       "title": "7\" SINGLE",
       "desc": "Perfect for singles, maximum music length on the side — 7 min.",
-      "price": "100 GEL"
+      "price": "55 GEL"
     },
     "size10": {
       "title": "10\" EP",
       "desc": "Extended play format, maximum music length on each side — 11 min.",
-      "price": "100 GEL"
+      "price": "80 GEL"
     },
     "size12": {
       "title": "12\" LP",
@@ -94,14 +94,20 @@
     "colorRed": "Red",
     "colorTransparent": "Transparent",
     "colorBlack": "Black",
-    "step4": "4. CENTER STICKER",
+    "stepOuterSleeve": "4. OUTER SLEEVE",
+    "outerSleeveOption": "Outer Sleeve",
+    "addToOrder": "Add to order",
+    "added": "Added",
+    "step4": "5. CENTER STICKER",
+    "defaultSticker": "Firfita Default Sticker",
+    "customSticker": "Custom Sticker",
     "pasteLink": "Paste link for sticker artwork (WeTransfer, Google Drive...)",
     "stickerFormatInfo": "Artwork must be in JPEG / PNG / PDF format.",
     "downloadTemplate": "Download template",
     "step5": "5. PACKAGING",
     "customSleeve": "Custom outer sleeve",
     "blankSleeve": "Blank",
-    "step6": "6. QUANTITY",
+    "step6": "6. DUBPLATE QUANTITY",
     "summaryTitle": "TOTAL",
     "submit": "SUBMIT ORDER"
   },
