@@ -21,7 +21,7 @@ export default function ServicesPage() {
 
         <div className="flex flex-col gap-8 w-full pt-12 mt-4">
            <Link href="/order" className="p-8 md:p-12 border-2 border-white bg-black text-white hover:bg-white hover:text-black transition-all cursor-pointer">
-              <h3 className="font-display text-3xl font-bold mb-4 uppercase tracking-widest">One-Off Dubplates</h3>
+              <h3 className="font-display text-3xl font-bold mb-4 uppercase tracking-widest">One-Off Vinyl Records</h3>
               <p className="opacity-80 font-light text-lg">High quality cutting of individual tracks for your DJ sets or personal collection. Fast turnaround and premium sound.</p>
            </Link>
            <Link href="/order" className="p-8 md:p-12 border-2 border-white bg-black text-white hover:bg-white hover:text-black transition-all cursor-pointer">

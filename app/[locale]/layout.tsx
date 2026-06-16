@@ -21,7 +21,7 @@ const openSans = Open_Sans({
 export const runtime = 'edge';
 
 export const metadata: Metadata = {
-  title: "Dubplate Cutting Service",
+  title: "Vinyl Record Cutting Service",
   description: "Custom vinyl cutting from one-off to short runs.",
 };
 

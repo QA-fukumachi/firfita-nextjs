@@ -42,8 +42,10 @@ export default function OrderPage() {
   const [stickerType, setStickerType] = usePersistedState<'default' | 'custom'>('order_stickerType', 'default');
   const [stickerLink, setStickerLink] = usePersistedState('order_stickerLink', '');
   const [addOuterSleeve, setAddOuterSleeve] = usePersistedState<boolean>('order_addOuterSleeve', false);
+  const [outerSleeveLink, setOuterSleeveLink] = usePersistedState('order_outerSleeveLink', '');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
   const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null);
   const [showDefaultStickerPreview, setShowDefaultStickerPreview] = useState(false);
 
@@ -107,10 +109,20 @@ export default function OrderPage() {
       total += 8 * parsedQty;
     }
 
+    if (color === 'Transparent' || color === 'Red') {
+      total += 20 * parsedQty;
+    }
+
     return total;
   };
 
   const handleSubmit = async () => {
+    if (!size || !color || !info.name || !info.phone || !info.email.includes('@') || (addOuterSleeve && !outerSleeveLink.trim()) || (stickerType === 'custom' && !stickerLink.trim())) {
+      setShowErrors(true);
+      return;
+    }
+
+    setShowErrors(false);
     setIsSubmitting(true);
     setSubmitResult(null);
 
@@ -125,6 +137,7 @@ export default function OrderPage() {
       "Color": color,
       "Quantity": parsedQty,
       "Outer Sleeve Quantity": parsedOsQty,
+      "Outer Sleeve Link": addOuterSleeve ? (outerSleeveLink || "None provided") : "N/A",
       "Center Sticker": stickerType === 'custom' ? "Custom Design" : "Firfita Default",
       "Sticker Link": stickerType === 'custom' ? (stickerLink || "None provided") : "N/A",
       "Total Price": calculateTotal() + " GEL"
@@ -150,6 +163,7 @@ export default function OrderPage() {
         setAddOuterSleeve(false);
         setStickerType('default');
         setStickerLink('');
+        setOuterSleeveLink('');
         setQuantity(1);
       } else {
         setSubmitResult({ success: false, message: result.message || "Something went wrong" });
@@ -205,7 +219,7 @@ export default function OrderPage() {
                 placeholder={t('name')}
                 value={info.name}
                 onChange={e => setInfo({...info, name: e.target.value})}
-                className="bg-transparent border-b border-gray-300 py-3 outline-none focus:border-black transition-all text-base placeholder-gray-400"
+                className={`bg-transparent border-b py-3 outline-none transition-all text-base ${showErrors && !info.name ? 'border-red-500 placeholder-red-300' : 'border-gray-300 focus:border-black placeholder-gray-400'}`}
               />
               <input 
                 type="text" 
@@ -219,14 +233,14 @@ export default function OrderPage() {
                 placeholder={t('email') || "Email Address"}
                 value={info.email}
                 onChange={e => setInfo({...info, email: e.target.value})}
-                className="bg-transparent border-b border-gray-300 py-3 outline-none focus:border-black transition-all text-base placeholder-gray-400"
+                className={`bg-transparent border-b py-3 outline-none transition-all text-base ${showErrors && !info.email.includes('@') ? 'border-red-500 placeholder-red-300' : 'border-gray-300 focus:border-black placeholder-gray-400'}`}
               />
               <input 
                 type="tel" 
                 placeholder={t('phone')}
                 value={info.phone}
                 onChange={e => setInfo({...info, phone: e.target.value})}
-                className="bg-transparent border-b border-gray-300 py-3 outline-none focus:border-black transition-all text-base placeholder-gray-400"
+                className={`bg-transparent border-b py-3 outline-none transition-all text-base ${showErrors && !info.phone ? 'border-red-500 placeholder-red-300' : 'border-gray-300 focus:border-black placeholder-gray-400'}`}
               />
             </div>
           </section>
@@ -239,7 +253,7 @@ export default function OrderPage() {
                 <div 
                   key={s!}
                   onClick={() => setSize(s)}
-                  className={`p-6 md:p-8 flex flex-col h-full cursor-pointer transition-all border-2 ${size === s ? 'border-black bg-gray-50' : 'border-gray-200 bg-white hover:border-gray-400'}`}
+                  className={`p-6 md:p-8 flex flex-col h-full cursor-pointer transition-all border-2 ${size === s ? 'border-black bg-gray-50' : showErrors && !size ? 'border-red-500 bg-red-50 hover:border-red-600' : 'border-gray-200 bg-white hover:border-gray-400'}`}
                 >
                   <div className="font-display text-4xl mb-4">{t(`size${s}.title`)}</div>
                   <p className="text-sm text-gray-500 mb-8">{t(`size${s}.desc`)}</p>
@@ -259,7 +273,7 @@ export default function OrderPage() {
                   onClick={() => setColor(c)}
                   className="flex flex-col items-center gap-6 cursor-pointer group"
                 >
-                  <div className={`w-40 h-40 rounded-full flex items-center justify-center p-1 transition-all ${color === c ? 'ring-2 ring-black scale-105' : 'group-hover:scale-105'}`}>
+                  <div className={`w-40 h-40 rounded-full flex items-center justify-center p-1 transition-all ${color === c ? 'ring-2 ring-black scale-105' : showErrors && !color ? 'ring-2 ring-red-500 bg-red-50' : 'group-hover:scale-105'}`}>
                     {images[c!] ? (
                       <img src={images[c!]} alt={c!} className="w-full h-full rounded-full object-cover shadow-lg border border-gray-200" />
                     ) : (
@@ -270,7 +284,12 @@ export default function OrderPage() {
                       </div>
                     )}
                   </div>
-                  <span className={`font-display tracking-widest text-sm uppercase font-bold transition-colors ${color === c ? 'text-black' : 'text-gray-400 group-hover:text-black'}`}>{t(`color${c}`)}</span>
+                  <span className={`font-display tracking-widest text-sm uppercase font-bold transition-colors text-center ${color === c ? 'text-black' : 'text-gray-400 group-hover:text-black'}`}>
+                    {t(`color${c}`)}
+                    {(c === 'Red' || c === 'Transparent') && (
+                      <span className="block text-xs font-bold mt-1 normal-case">(+20 GEL)</span>
+                    )}
+                  </span>
                 </div>
               ))}
             </div>
@@ -293,7 +312,7 @@ export default function OrderPage() {
                     className="w-full h-auto object-contain" 
                   />
                 </div>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 flex-1 min-w-0 w-full">
                 <span className="font-display tracking-widest text-sm uppercase font-bold text-black flex items-center gap-2">
                   {(size === '12' || size === '10' || size === '7') && (
                     <span className={`text-xs font-bold normal-case ${sleevePricing.current < sleevePricing.base ? 'text-green-600' : 'text-gray-500'}`}>
@@ -302,13 +321,28 @@ export default function OrderPage() {
                     </span>
                   )}
                 </span>
-                <div className="flex items-center gap-4">
-                  <button 
-                    onClick={() => setAddOuterSleeve(!addOuterSleeve)} 
-                    className={`px-6 py-2 border border-black font-display tracking-widest uppercase font-bold transition-colors ${addOuterSleeve ? 'bg-black text-white' : 'bg-transparent text-black hover:bg-black/5'}`}
-                  >
-                    {addOuterSleeve ? t('added') : t('addToOrder')}
-                  </button>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-4">
+                    <button 
+                      onClick={() => setAddOuterSleeve(!addOuterSleeve)} 
+                      className={`px-6 py-2 border border-black font-display tracking-widest uppercase font-bold transition-colors ${addOuterSleeve ? 'bg-black text-white' : 'bg-transparent text-black hover:bg-black/5'}`}
+                    >
+                      {addOuterSleeve ? t('added') : t('addToOrder')}
+                    </button>
+                  </div>
+                  <div className={`flex flex-col gap-2 transition-all overflow-hidden ${addOuterSleeve ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <input 
+                      type="text" 
+                      placeholder={t('pasteOuterSleeveLink')}
+                      value={outerSleeveLink}
+                      onChange={e => setOuterSleeveLink(e.target.value)}
+                      className={`bg-transparent border-b py-3 outline-none transition-all text-base w-full ${showErrors && addOuterSleeve && !outerSleeveLink.trim() ? 'border-red-500 placeholder-red-300 text-red-500' : 'border-gray-300 focus:border-black text-black placeholder-gray-400'}`}
+                    />
+                    <div className="text-sm mt-2 text-gray-500 flex flex-col gap-1">
+                      <p>{t('outerSleeveFormatInfo1')}</p>
+                      <p>{t('outerSleeveFormatInfo2')}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -345,13 +379,13 @@ export default function OrderPage() {
                    value={stickerLink}
                    onChange={e => setStickerLink(e.target.value)}
                    disabled={stickerType === 'default'}
-                   className={`bg-transparent border-b py-3 outline-none transition-all text-base w-full ${stickerType === 'default' ? 'border-gray-200 text-gray-300 placeholder-gray-200 cursor-not-allowed' : 'border-gray-300 focus:border-black text-black placeholder-gray-400'}`}
+                   className={`bg-transparent border-b py-3 outline-none transition-all text-base w-full ${showErrors && stickerType === 'custom' && !stickerLink.trim() ? 'border-red-500 placeholder-red-300 text-red-500' : stickerType === 'default' ? 'border-gray-200 text-gray-300 placeholder-gray-200 cursor-not-allowed' : 'border-gray-300 focus:border-black text-black placeholder-gray-400'}`}
                  />
                  <p className={`text-sm mt-2 ${stickerType === 'default' ? 'text-gray-300' : 'text-gray-500'}`}>
                    {t('stickerFormatInfo')} 
                    <a 
-                     href={stickerType === 'default' ? undefined : "/public%20template/Dubplate%20Sticker.jpg"}
-                     download="Dubplate Sticker.jpg"
+                     href={stickerType === 'default' ? undefined : "/public%20template/Vinyl%20Record%20Sticker.jpg"}
+                     download="Vinyl Record Sticker.jpg"
                      className={`inline-block font-bold underline ml-1 ${stickerType === 'default' ? 'cursor-not-allowed opacity-50' : 'hover:text-accent-red cursor-pointer'}`}
                      onClick={(e) => {
                        if (stickerType === 'default') {
@@ -454,22 +488,40 @@ export default function OrderPage() {
              )}
 
              {stickerType === 'custom' && (
-               <div className="flex items-start justify-between mt-4 gap-4 w-full">
-                 <div className="flex flex-col min-w-0 flex-1 gap-1">
-                   <span className="font-display font-bold text-white text-base md:text-lg break-words leading-tight">
-                     {t('customSticker')}
-                   </span>
-                   <span className="font-display text-gray-400 text-sm">
-                     8 GEL &times; {parsedQty.toLocaleString('en-US').replace(/,/g, ' ')}
-                   </span>
-                 </div>
-                 <div className="flex flex-col items-end shrink-0 pl-2">
-                   <span className="font-display text-lg font-bold text-white">
-                     + {(8 * parsedQty).toLocaleString('en-US').replace(/,/g, ' ')} GEL
-                   </span>
-                 </div>
-               </div>
-             )}
+                <div className="flex items-start justify-between mt-4 gap-4 w-full">
+                  <div className="flex flex-col min-w-0 flex-1 gap-1">
+                    <span className="font-display font-bold text-white text-base md:text-lg break-words leading-tight">
+                      {t('customSticker')}
+                    </span>
+                    <span className="font-display text-gray-400 text-sm">
+                      8 GEL &times; {parsedQty.toLocaleString('en-US').replace(/,/g, ' ')}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-end shrink-0 pl-2">
+                    <span className="font-display text-lg font-bold text-white">
+                      + {(8 * parsedQty).toLocaleString('en-US').replace(/,/g, ' ')} GEL
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {(color === 'Transparent' || color === 'Red') && (
+                <div className="flex items-start justify-between mt-4 gap-4 w-full">
+                  <div className="flex flex-col min-w-0 flex-1 gap-1">
+                    <span className="font-display font-bold text-white text-base md:text-lg break-words leading-tight">
+                      {t(`color${color}`)}
+                    </span>
+                    <span className="font-display text-gray-400 text-sm">
+                      20 GEL &times; {parsedQty.toLocaleString('en-US').replace(/,/g, ' ')}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-end shrink-0 pl-2">
+                    <span className="font-display text-lg font-bold text-white">
+                      + {(20 * parsedQty).toLocaleString('en-US').replace(/,/g, ' ')} GEL
+                    </span>
+                  </div>
+                </div>
+              )}
 
              <hr className="border-white/20" />
 
@@ -480,7 +532,7 @@ export default function OrderPage() {
 
              <button 
                onClick={handleSubmit}
-               disabled={!size || !color || !info.name || !info.phone || !info.email.includes('@') || isSubmitting}
+               disabled={isSubmitting}
                className="w-full py-6 mt-4 bg-white text-black font-display font-bold tracking-widest text-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent-red hover:text-white transition-all transform hover:scale-[1.02] active:scale-95"
              >
                 {isSubmitting ? 'SUBMITTING...' : t('submit')}

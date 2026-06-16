@@ -1,6 +1,6 @@
 {
   "Global": {
-    "title": "Dubplate Cutting Service"
+    "title": "Vinyl Record Cutting Service"
   },
   "Navbar": {
     "home": "HOME",
@@ -18,9 +18,9 @@
       "12": "12\""
     },
     "service": {
-      "title": "Who are Dubplates great for?",
-      "p1": "For DJs who want to play any track on vinyl, including unreleased music, in their vinyl-only sets.",
-      "p2": "For every music enthusiast who just want to have any musical piece in a physical form.",
+      "title": "Who are Vinyl records great for?",
+      "p1": "For every music enthusiast who just want to have any musical piece in a physical form.",
+      "p2": "For DJs who want to play any track on vinyl, including unreleased music, in their vinyl-only sets.",
       "p3": "For musicians and producers who want to bring their music into physical form.",
       "blocks": {
         "oneOff": {
@@ -33,7 +33,7 @@
         },
         "formats": {
           "title": "ALL FORMATS",
-          "desc": "7\", 10\" and 12\" dubplates"
+          "desc": "7\", 10\" and 12\" vinyl records"
         }
       },
       "viewAllServices": "VIEW ALL SERVICES"
@@ -43,7 +43,7 @@
     },
     "about": {
       "title": "ABOUT US",
-      "body": "We are music enthusiasts who live for records, grooves and the sound of a needle hitting wax. We cut vinyls. One-offs, dubplates, short runs. Your music, turned into a record you can actually spin. For DJs, producers, labels, anyone tired of their tracks living in a folder."
+      "body": "We are music enthusiasts who live for records, grooves and the sound of a needle hitting wax. We cut vinyls. One-offs, vinyl records, short runs. Your music, turned into a record you can actually spin. For DJs, producers, labels, anyone tired of their tracks living in a folder."
     },
     "contact": {
       "title": "CONTACT US",
@@ -52,7 +52,7 @@
     }
   },
   "Order": {
-    "title": "CONFIGURE YOUR DUBPLATE",
+    "title": "CONFIGURE YOUR VINYL RECORD",
     "step1": "1. CUSTOMER INFO",
     "name": "First Name",
     "lastName": "Last Name",
@@ -94,27 +94,30 @@
     "colorRed": "Red",
     "colorTransparent": "Transparent",
     "colorBlack": "Black",
-    "stepOuterSleeve": "4. OUTER SLEEVE",
+    "stepOuterSleeve": "4. OUTER SLEEVE CUSTOM DESIGN",
     "outerSleeveOption": "Outer Sleeve",
     "addToOrder": "Add to order",
     "added": "Added",
     "step4": "5. CENTER STICKER",
     "defaultSticker": "Firfita Default Sticker",
     "customSticker": "Custom Sticker",
+    "pasteOuterSleeveLink": "Google Drive or WeTransfer link",
     "pasteLink": "Paste link for sticker artwork (WeTransfer, Google Drive...)",
+    "outerSleeveFormatInfo1": "Artwork must be JPEG or PNG",
+    "outerSleeveFormatInfo2": "Dimensions must be square",
     "stickerFormatInfo": "Artwork must be in JPEG / PNG / PDF format.",
     "downloadTemplate": "Download template",
     "step5": "5. PACKAGING",
     "customSleeve": "Custom outer sleeve",
     "blankSleeve": "Blank",
-    "step6": "6. DUBPLATE QUANTITY",
+    "step6": "6. VINYL QUANTITY",
     "summaryTitle": "TOTAL",
     "submit": "SUBMIT ORDER"
   },
   "About": {
     "title": "ABOUT US",
     "p1": "We are music enthusiasts who live for records, grooves and the sound of a needle hitting wax.",
-    "p2": "We cut vinyls. One-offs, dubplates, short runs. Your music, turned into a record you can actually spin. For DJs, producers, labels, anyone tired of their tracks living in a folder."
+    "p2": "We cut vinyls. One-offs, vinyl records, short runs. Your music, turned into a record you can actually spin. For DJs, producers, labels, anyone tired of their tracks living in a folder."
   },
   "Contact": {
     "title": "GET IN TOUCH",
@@ -124,7 +127,7 @@
   },
   "Pricing": {
     "title": "PRICING",
-    "desc": "Clear, straightforward pricing for high-quality dubplates.",
+    "desc": "Clear, straightforward pricing for high-quality vinyl records.",
     "sizes": "Sizes & Formats",
     "extras": "Extras & Add-ons"
   },

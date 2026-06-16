@@ -59,7 +59,12 @@ export default function Home() {
           
           <div className="flex gap-4 md:gap-8 justify-center">
             {['7', '10', '12'].map((size) => (
-              <Link href="/order" key={size} className="w-16 h-16 md:w-24 md:h-24 border-2 border-white flex items-center justify-center bg-black text-white hover:bg-white hover:text-black transition-all cursor-pointer">
+              <Link 
+                href="/order" 
+                key={size} 
+                onClick={() => sessionStorage.setItem('order_size', '"12"')}
+                className="w-16 h-16 md:w-24 md:h-24 border-2 border-white flex items-center justify-center bg-black text-white hover:bg-white hover:text-black transition-all cursor-pointer"
+              >
                 <span className="font-display text-xl md:text-3xl font-bold">{t(`sizes.${size}`)}</span>
               </Link>
             ))}
@@ -67,6 +72,7 @@ export default function Home() {
 
           <Link 
             href="/order"
+            onClick={() => sessionStorage.clear()}
             className="mt-2 bg-accent-red text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-display font-bold tracking-widest text-sm md:text-base hover:scale-105 hover:bg-white hover:text-black transition-all duration-300"
           >
             {t('startOrder')}
@@ -185,9 +191,9 @@ export default function Home() {
       </section>
 
       {/* SECTION 5: CONTACT US */}
-      <section id="contact" className="w-full py-32 px-6 bg-accent-red text-white text-center flex flex-col gap-8">
-        <h2 className="font-display font-bold text-3xl md:text-4xl lg:text-5xl xl:text-6xl tracking-tight uppercase break-words">{t('contact.title')}</h2>
-        <div className="flex flex-col gap-2 font-display text-2xl md:text-4xl lg:text-5xl tracking-widest break-words">
+      <section id="contact" className="w-full py-16 px-6 bg-accent-red text-white text-center flex flex-col gap-4">
+        <h2 className="font-display font-bold text-2xl md:text-3xl lg:text-4xl xl:text-5xl tracking-tight uppercase break-words">{t('contact.title')}</h2>
+        <div className="flex flex-col gap-1 font-display text-xl md:text-2xl lg:text-3xl tracking-widest break-words">
           <a href={`mailto:${t('contact.email')}`} className="hover:opacity-80 transition-opacity">{t('contact.email')}</a>
           <a href={`tel:${t('contact.phone')}`} className="hover:opacity-80 transition-opacity">{t('contact.phone')}</a>
         </div>
