@@ -47,8 +47,9 @@
     },
     "contact": {
       "title": "კონტაქტი",
-      "email": "firfita@gmail.com",
-      "phone": "+599 599 00 00 00"
+      "email": "firfita.studio@gmail.com",
+      "phone": "+995 591 03 60 41",
+      "address": "მისამართი: სანდრო ახმეტელის 10ა, დიღომი, თბილისი."
     }
   },
   "Order": {
@@ -123,7 +124,7 @@
     "title": "კონტაქტი",
     "email": "firfita@gmail.com",
     "phone": "+995 599 00 00 00",
-    "address": "თბილისი, საქართველო"
+    "address": "მისამართი: სანდრო ახმეტელის 10ა, დიღომი, თბილისი."
   },
   "Pricing": {
     "title": "ფასები",

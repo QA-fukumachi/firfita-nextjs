@@ -47,8 +47,9 @@
     },
     "contact": {
       "title": "CONTACT US",
-      "email": "firfita@gmail.com",
-      "phone": "+599 599 00 00 00"
+      "email": "firfita.studio@gmail.com",
+      "phone": "+995 591 03 60 41",
+      "address": "Address: Sandro Akhmeteli 10a, Dighomi, Tbilisi"
     }
   },
   "Order": {
@@ -121,9 +122,9 @@
   },
   "Contact": {
     "title": "GET IN TOUCH",
-    "email": "firfita@gmail.com",
-    "phone": "+995 599 00 00 00",
-    "address": "Tbilisi, Georgia"
+    "email": "firfita.studio@gmail.com",
+    "phone": "+995 591 03 60 41",
+    "address": "Address: Sandro Akhmeteli 10a, Dighomi, Tbilisi"
   },
   "Pricing": {
     "title": "PRICING",
