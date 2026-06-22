@@ -46,6 +46,8 @@ export default function OrderPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null);
   const [showDefaultStickerPreview, setShowDefaultStickerPreview] = useState(false);
 
@@ -201,6 +203,59 @@ export default function OrderPage() {
               className="w-full h-auto aspect-square object-cover rounded-full shadow-[0_0_60px_rgba(0,0,0,0.6)] border border-white/20"
               onClick={(e) => e.stopPropagation()}
             />
+          </div>
+        </div>
+      )}
+
+      {showTermsModal && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setShowTermsModal(false)}
+        >
+          <div 
+            className="relative w-full max-w-2xl max-h-[80vh] flex flex-col bg-white text-black border border-black p-6 md:p-10 overflow-y-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setShowTermsModal(false)}
+              className="absolute top-4 right-4 bg-black/60 hover:bg-black w-10 h-10 flex items-center justify-center text-white font-bold text-lg transition-all z-10"
+            >
+              ✕
+            </button>
+            
+            <h2 className="text-2xl font-bold mb-6 mt-4 font-display">{t('termsModalTitle')}</h2>
+            
+            <div className="flex flex-col gap-4 text-sm md:text-base text-gray-800 tracking-wider">
+              <p>{t('termsModalP1')}</p>
+              <p>{t('termsModalP2')}</p>
+              <p>{t('termsModalP3')}</p>
+              <p>{t('termsModalP4')}</p>
+              <p>{t('termsModalP5')}</p>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col gap-4">
+              <label className="flex items-start gap-4 cursor-pointer group">
+                <div className={`mt-1 shrink-0 w-6 h-6 border flex items-center justify-center transition-colors ${agreed ? 'bg-black border-black' : 'border-gray-500'}`}>
+                  {agreed && <span className="text-white text-sm font-bold">✓</span>}
+                </div>
+                <input 
+                  type="checkbox" 
+                  className="hidden" 
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                />
+                <span className="text-sm md:text-base text-black select-none">
+                  {t('termsCheckboxLabel')}
+                </span>
+              </label>
+
+              <button 
+                onClick={() => setShowTermsModal(false)}
+                className="w-full mt-4 py-4 bg-black text-white font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors"
+              >
+                {t('termsModalClose')}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -525,15 +580,42 @@ export default function OrderPage() {
 
              <hr className="border-white/20" />
 
-             <div className="flex items-end justify-between mt-2">
+             <div className="mt-8 flex flex-col gap-4">
+                <label className="flex items-start gap-4 cursor-pointer group">
+                  <div className={`mt-1 shrink-0 w-6 h-6 border flex items-center justify-center transition-colors ${agreed ? 'bg-[#2eb872] border-[#2eb872]' : 'border-gray-500 group-hover:border-white'}`}>
+                    {agreed && <span className="text-white text-sm font-bold">✓</span>}
+                  </div>
+                  <input 
+                    type="checkbox" 
+                    className="hidden" 
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                  />
+                  <div className="text-sm text-gray-300 leading-relaxed select-none">
+                    {t('termsCheckboxLabel').split(t('termsLink'))[0]}
+                    <span 
+                      className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors mx-1"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowTermsModal(true);
+                      }}
+                    >
+                      {t('termsLink')}
+                    </span>
+                    {t('termsCheckboxLabel').split(t('termsLink'))[1]}
+                  </div>
+                </label>
+             </div>
+
+             <div className="flex items-end justify-between mt-6">
                 <span className="font-display tracking-widest text-gray-400 mb-1.5">{t('summaryTitle')}</span>
                 <span className="font-display text-4xl font-bold">{calculateTotal().toLocaleString('en-US').replace(/,/g, ' ')} GEL</span>
              </div>
 
              <button 
                onClick={handleSubmit}
-               disabled={isSubmitting}
-               className="w-full py-6 mt-4 bg-white text-black font-display font-bold tracking-widest text-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent-red hover:text-white transition-all transform hover:scale-[1.02] active:scale-95"
+               disabled={isSubmitting || !agreed}
+               className={`w-full py-6 mt-6 font-display font-bold tracking-widest text-xl transition-all transform ${isSubmitting || !agreed ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' : 'bg-white text-black hover:bg-accent-red hover:text-white hover:scale-[1.02] active:scale-95'}`}
              >
                 {isSubmitting ? 'SUBMITTING...' : t('submit')}
              </button>
