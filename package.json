@@ -11,6 +11,7 @@
     "bog:types": "openapi-typescript .agent/skills/bog-payments/openapi.yaml -o src/lib/bog/types.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.109.0",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",

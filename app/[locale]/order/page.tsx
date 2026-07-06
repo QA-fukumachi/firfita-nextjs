@@ -2,9 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import {
+  getVinylPricing,
+  getSleevePricing,
+  type Size as OrderSize,
+  type Color as OrderColor,
+} from '@/src/lib/pricing';
 
-type Size = '7' | '10' | '12' | 'test1' | 'test15' | 'test05' | null;
-type Color = 'Red' | 'Transparent' | 'Black' | null;
+type Size = OrderSize | null;
+type Color = OrderColor | null;
 
 function usePersistedState<T>(key: string, initialValue: T): [T, (val: T | ((prev: T) => T)) => void] {
   const [state, setState] = useState<T>(initialValue);
@@ -51,49 +57,6 @@ export default function OrderPage() {
   const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null);
   const [showDefaultStickerPreview, setShowDefaultStickerPreview] = useState(false);
 
-  const getVinylPricing = (sz: Size, q: number) => {
-    if (sz === '12') {
-      if (q >= 51) return { base: 100, current: 60 };
-      if (q >= 26) return { base: 100, current: 70 };
-      if (q >= 11) return { base: 100, current: 80 };
-      return { base: 100, current: 100 };
-    }
-    if (sz === '10') {
-      if (q >= 51) return { base: 80, current: 60 };
-      if (q >= 26) return { base: 80, current: 70 };
-      return { base: 80, current: 80 };
-    }
-    if (sz === '7') {
-      if (q >= 51) return { base: 55, current: 40 };
-      if (q >= 11) return { base: 55, current: 45 };
-      return { base: 55, current: 55 };
-    }
-    if (sz === 'test1') return { base: 1, current: 1 };
-    if (sz === 'test15') return { base: 1.5, current: 1.5 };
-    if (sz === 'test05') return { base: 0.5, current: 0.5 };
-    
-    return { base: 0, current: 0 };
-  };
-
-  const getSleevePricing = (sz: Size, osQ: number) => {
-    if (sz === '12') {
-      if (osQ >= 51) return { base: 20, current: 12 };
-      if (osQ >= 26) return { base: 20, current: 16 };
-      return { base: 20, current: 20 };
-    }
-    if (sz === '10') {
-      if (osQ >= 51) return { base: 15, current: 8 };
-      if (osQ >= 26) return { base: 15, current: 12 };
-      return { base: 15, current: 15 };
-    }
-    if (sz === '7') {
-      if (osQ >= 101) return { base: 10, current: 7 };
-      if (osQ >= 26) return { base: 10, current: 8 };
-      return { base: 10, current: 10 };
-    }
-    return { base: 0, current: 0 };
-  };
-
   const parsedQty = typeof quantity === 'number' ? quantity : (parseInt(quantity as string) || 1);
   const parsedOsQty = addOuterSleeve ? parsedQty : 0;
 
@@ -129,24 +92,22 @@ export default function OrderPage() {
     setSubmitResult(null);
 
     const payload = {
-      access_key: "45e0a590-f72c-4d94-95a3-5f9cafeb5e91",
-      subject: "New Order Submission - Firfita",
-      "First Name": info.name,
-      "Last Name": info.lastName,
-      "Email": info.email,
-      "Phone": info.phone,
-      "Size": size,
-      "Color": color,
-      "Quantity": parsedQty,
-      "Outer Sleeve Quantity": parsedOsQty,
-      "Outer Sleeve Link": addOuterSleeve ? (outerSleeveLink || "None provided") : "N/A",
-      "Center Sticker": stickerType === 'custom' ? "Custom Design" : "Firfita Default",
-      "Sticker Link": stickerType === 'custom' ? (stickerLink || "None provided") : "N/A",
-      "Total Price": calculateTotal() + " GEL"
+      firstName: info.name,
+      lastName: info.lastName,
+      email: info.email,
+      phone: info.phone,
+      size,
+      color,
+      quantity: parsedQty,
+      stickerType,
+      stickerLink,
+      outerSleeve: addOuterSleeve,
+      outerSleeveLink,
+      termsAccepted: agreed,
     };
 
     try {
-      const response = await fetch("https://api.web3forms.com/submit", {
+      const response = await fetch("/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -155,8 +116,8 @@ export default function OrderPage() {
         body: JSON.stringify(payload),
       });
       const result = await response.json();
-      if (response.status === 200) {
-        setSubmitResult({ success: true, message: "Order placed successfully!" });
+      if (response.ok) {
+        setSubmitResult({ success: true, message: `Order placed successfully! Order ID: ${result.orderId}` });
         // Optional: clear form after success
         setInfo({ name: '', lastName: '', phone: '', email: '' });
         setSize(null);
@@ -168,9 +129,9 @@ export default function OrderPage() {
         setOuterSleeveLink('');
         setQuantity(1);
       } else {
-        setSubmitResult({ success: false, message: result.message || "Something went wrong" });
+        setSubmitResult({ success: false, message: result.error || "Something went wrong" });
       }
-    } catch (error) {
+    } catch {
       setSubmitResult({ success: false, message: "Network error, please try again." });
     } finally {
       setIsSubmitting(false);

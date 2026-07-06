@@ -1,0 +1,89 @@
+// Single source of truth for order pricing. Used by the order form (display)
+// and by /api/orders (authoritative recalculation — client totals are never
+// trusted). All amounts are GEL major units.
+
+export type Size = '7' | '10' | '12' | 'test1' | 'test15' | 'test05';
+export type Color = 'Red' | 'Transparent' | 'Black';
+export type StickerType = 'default' | 'custom';
+
+export const SIZES: Size[] = ['7', '10', '12', 'test1', 'test15', 'test05'];
+export const COLORS: Color[] = ['Black', 'Red', 'Transparent'];
+
+export const CUSTOM_STICKER_PRICE = 8;
+export const COLOR_SURCHARGE = 20;
+
+export interface TierPrice {
+  base: number;
+  current: number;
+}
+
+export function getVinylPricing(size: Size | null, qty: number): TierPrice {
+  if (size === '12') {
+    if (qty >= 51) return { base: 100, current: 60 };
+    if (qty >= 26) return { base: 100, current: 70 };
+    if (qty >= 11) return { base: 100, current: 80 };
+    return { base: 100, current: 100 };
+  }
+  if (size === '10') {
+    if (qty >= 51) return { base: 80, current: 60 };
+    if (qty >= 26) return { base: 80, current: 70 };
+    return { base: 80, current: 80 };
+  }
+  if (size === '7') {
+    if (qty >= 51) return { base: 55, current: 40 };
+    if (qty >= 11) return { base: 55, current: 45 };
+    return { base: 55, current: 55 };
+  }
+  if (size === 'test1') return { base: 1, current: 1 };
+  if (size === 'test15') return { base: 1.5, current: 1.5 };
+  if (size === 'test05') return { base: 0.5, current: 0.5 };
+
+  return { base: 0, current: 0 };
+}
+
+export function getSleevePricing(size: Size | null, sleeveQty: number): TierPrice {
+  if (size === '12') {
+    if (sleeveQty >= 51) return { base: 20, current: 12 };
+    if (sleeveQty >= 26) return { base: 20, current: 16 };
+    return { base: 20, current: 20 };
+  }
+  if (size === '10') {
+    if (sleeveQty >= 51) return { base: 15, current: 8 };
+    if (sleeveQty >= 26) return { base: 15, current: 12 };
+    return { base: 15, current: 15 };
+  }
+  if (size === '7') {
+    if (sleeveQty >= 101) return { base: 10, current: 7 };
+    if (sleeveQty >= 26) return { base: 10, current: 8 };
+    return { base: 10, current: 10 };
+  }
+  return { base: 0, current: 0 };
+}
+
+export interface OrderSpec {
+  size: Size;
+  color: Color;
+  quantity: number;
+  stickerType: StickerType;
+  outerSleeve: boolean;
+}
+
+export function calculateTotal(spec: OrderSpec): number {
+  const vinyl = getVinylPricing(spec.size, spec.quantity);
+  let total = vinyl.current * spec.quantity;
+
+  if (spec.outerSleeve) {
+    const sleeve = getSleevePricing(spec.size, spec.quantity);
+    total += sleeve.current * spec.quantity;
+  }
+
+  if (spec.stickerType === 'custom' && (spec.size === '12' || spec.size === '10' || spec.size === '7')) {
+    total += CUSTOM_STICKER_PRICE * spec.quantity;
+  }
+
+  if (spec.color === 'Transparent' || spec.color === 'Red') {
+    total += COLOR_SURCHARGE * spec.quantity;
+  }
+
+  return total;
+}
