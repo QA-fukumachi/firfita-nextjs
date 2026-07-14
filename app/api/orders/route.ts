@@ -125,6 +125,10 @@ export async function POST(request: Request) {
         description: `Firfita vinyl order ${order.id}`,
         serverCallbackUrl: `${siteUrl}/api/flitt/callback`,
         responseUrl: `${siteUrl}/api/flitt/return?locale=${locale}`,
+        // 30 minutes to complete the payment; then Flitt expires the order
+        // and its callback cancels it, so abandoned checkouts don't pile up
+        // as pending_payment.
+        lifetime: 1800,
       });
 
       const { error: payIdError } = await supabase

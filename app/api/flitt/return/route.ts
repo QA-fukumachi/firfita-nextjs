@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getFlittConfig } from '@/src/lib/flitt/client';
+import { reconcileOrder } from '@/src/lib/flitt/orders';
 
 export const runtime = 'edge';
 
@@ -6,38 +8,58 @@ export const runtime = 'edge';
 // result. This can arrive as a POST (form or JSON) or a plain GET, so a page
 // component can't receive it — this route absorbs it and redirects to the
 // order page, which shows the outcome from the `payment` query param.
-// The result shown here is informational only; the order status is decided
-// exclusively by the signed server callback.
+//
+// The banner never trusts the browser-supplied payload: the order status is
+// reconciled against Flitt's signed status API. That also settles orders the
+// server callback missed (e.g. a checkout the customer cancelled out of).
 
 const LOCALES = ['en', 'ka'];
 
-function resolveRedirect(request: Request, orderStatus: string | null): NextResponse {
+function redirectToOrderPage(request: Request, payment: 'success' | 'failed'): NextResponse {
   const url = new URL(request.url);
   const localeParam = url.searchParams.get('locale');
   const locale = localeParam && LOCALES.includes(localeParam) ? localeParam : 'ka';
-  const payment = orderStatus === 'approved' ? 'success' : 'failed';
   return NextResponse.redirect(new URL(`/${locale}/order?payment=${payment}`, url.origin), 303);
 }
 
-export async function POST(request: Request) {
-  let orderStatus: string | null = null;
+async function extractOrderId(request: Request): Promise<string | null> {
+  const fromQuery = new URL(request.url).searchParams.get('order_id');
+  if (fromQuery) return fromQuery;
+
   const contentType = request.headers.get('content-type') ?? '';
   try {
     if (contentType.includes('application/json')) {
       const body = (await request.json()) as Record<string, unknown>;
-      if (typeof body.order_status === 'string') orderStatus = body.order_status;
-    } else {
-      const form = await request.formData();
-      const value = form.get('order_status');
-      if (typeof value === 'string') orderStatus = value;
+      return typeof body.order_id === 'string' ? body.order_id : null;
     }
+    const form = await request.formData();
+    const value = form.get('order_id');
+    return typeof value === 'string' ? value : null;
   } catch {
-    // Unparseable body — fall through and report as failed.
+    return null;
   }
-  return resolveRedirect(request, orderStatus);
+}
+
+async function handleReturn(request: Request): Promise<NextResponse> {
+  const config = getFlittConfig();
+  const orderId = await extractOrderId(request);
+
+  let orderStatus: string | null = null;
+  if (config && orderId) {
+    try {
+      orderStatus = await reconcileOrder(config, orderId);
+    } catch (error) {
+      console.error('Flitt return: reconciliation failed:', error);
+    }
+  }
+
+  return redirectToOrderPage(request, orderStatus === 'approved' ? 'success' : 'failed');
+}
+
+export async function POST(request: Request) {
+  return handleReturn(request);
 }
 
 export async function GET(request: Request) {
-  const orderStatus = new URL(request.url).searchParams.get('order_status');
-  return resolveRedirect(request, orderStatus);
+  return handleReturn(request);
 }

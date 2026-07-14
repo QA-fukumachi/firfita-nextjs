@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
     "tbc:types": "openapi-typescript .agent/skills/tbc-payments/openapi.yaml -o src/lib/tbc/types.ts",
     "bog:types": "openapi-typescript .agent/skills/bog-payments/openapi.yaml -o src/lib/bog/types.ts"
   },
@@ -30,6 +31,7 @@
     "openapi-typescript": "^7.13.0",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vitest": "^4.1.10",
     "wrangler": "^4.86.0"
   }
 }

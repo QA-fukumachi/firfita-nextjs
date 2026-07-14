@@ -70,3 +70,9 @@ active payment provider; TBC/BOG direct integrations are prepared but not live.
 - Our callback handler is at `POST /api/flitt/callback` (signed, authoritative)
 - Browser return URL is `/api/flitt/return` (informational only, redirects to
   the order page with `?payment=success|failed`)
+- Checkout orders are created with `lifetime: 1800` (30 min); Flitt then sends
+  an `expired` callback and the order becomes `cancelled` — abandoned
+  checkouts never stay `pending_payment`.
+- Status mapping lives in `src/lib/flitt/orders.ts`: approved→paid,
+  declined→failed, expired→cancelled; created/processing/reversed are no-ops.
+- Unit tests: `npm test` (vitest, `src/lib/flitt/flitt.test.ts`).

@@ -54,6 +54,11 @@ export interface CreateCheckoutParams {
   description: string;
   serverCallbackUrl: string;
   responseUrl: string;
+  /**
+   * Seconds until the unpaid order expires at Flitt (default there is 10h).
+   * On expiry Flitt sends an `expired` callback, which cancels the order.
+   */
+  lifetime: number;
 }
 
 export interface FlittCheckout {
@@ -73,6 +78,7 @@ export async function createCheckout(
     order_desc: params.description,
     server_callback_url: params.serverCallbackUrl,
     response_url: params.responseUrl,
+    lifetime: params.lifetime,
   };
   request.signature = await buildSignature(request, config.secretKey);
 
