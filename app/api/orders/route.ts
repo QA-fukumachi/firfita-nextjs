@@ -113,7 +113,10 @@ export async function POST(request: Request) {
   }
 
   if (flittConfig) {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+    // Trailing slashes would produce double-slash callback URLs, which 404.
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin)
+      .trim()
+      .replace(/\/+$/, '');
     try {
       const checkout = await createCheckout(flittConfig, {
         orderId: order.id,
