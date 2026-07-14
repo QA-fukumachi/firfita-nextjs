@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/src/lib/supabase/server';
+import { createCheckout, getFlittConfig, toMinorUnits } from '@/src/lib/flitt/client';
 import {
   calculateTotal,
   getVinylPricing,
@@ -25,6 +26,7 @@ interface OrderRequestBody {
   outerSleeve?: boolean;
   outerSleeveLink?: string;
   termsAccepted?: boolean;
+  locale?: string;
 }
 
 function validationError(message: string) {
@@ -75,11 +77,17 @@ export async function POST(request: Request) {
   const unitPrice = getVinylPricing(size, quantity).current;
   const totalPrice = calculateTotal({ size, color, quantity, stickerType, outerSleeve });
 
+  // When Flitt credentials are configured the order goes through online
+  // payment; otherwise it falls back to the original email-only flow.
+  const flittConfig = getFlittConfig();
+  const locale = body.locale === 'en' ? 'en' : 'ka';
+
   const supabase = getSupabaseAdmin();
   const { data: order, error: dbError } = await supabase
     .from('orders')
     .insert({
-      status: 'received',
+      status: flittConfig ? 'pending_payment' : 'received',
+      payment_provider: flittConfig ? 'flitt' : null,
       first_name: firstName,
       last_name: lastName,
       email,
@@ -102,6 +110,42 @@ export async function POST(request: Request) {
   if (dbError || !order) {
     console.error('Order insert failed:', dbError);
     return NextResponse.json({ error: 'Could not save the order, please try again.' }, { status: 500 });
+  }
+
+  if (flittConfig) {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
+    try {
+      const checkout = await createCheckout(flittConfig, {
+        orderId: order.id,
+        amount: toMinorUnits(totalPrice),
+        currency: 'GEL',
+        description: `Firfita vinyl order ${order.id}`,
+        serverCallbackUrl: `${siteUrl}/api/flitt/callback`,
+        responseUrl: `${siteUrl}/api/flitt/return?locale=${locale}`,
+      });
+
+      const { error: payIdError } = await supabase
+        .from('orders')
+        .update({ flitt_payment_id: checkout.paymentId })
+        .eq('id', order.id);
+      if (payIdError) {
+        console.error('Failed to store Flitt payment id:', payIdError);
+      }
+
+      // The paid-order notification email is sent from the Flitt callback
+      // once the payment is approved, not here.
+      return NextResponse.json(
+        { orderId: order.id, total: totalPrice, checkoutUrl: checkout.checkoutUrl },
+        { status: 201 },
+      );
+    } catch (flittError) {
+      console.error('Flitt checkout creation failed:', flittError);
+      await supabase.from('orders').update({ status: 'failed' }).eq('id', order.id);
+      return NextResponse.json(
+        { error: 'Could not start the payment, please try again.' },
+        { status: 502 },
+      );
+    }
   }
 
   // Notification email. The order is already saved, so a failure here must

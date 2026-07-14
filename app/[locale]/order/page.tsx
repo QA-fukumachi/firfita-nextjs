@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   getVinylPricing,
   getSleevePricing,
@@ -39,7 +39,8 @@ function usePersistedState<T>(key: string, initialValue: T): [T, (val: T | ((pre
 
 export default function OrderPage() {
   const t = useTranslations('Order');
-  
+  const locale = useLocale();
+
   const [size, setSize] = usePersistedState<Size>('order_size', null);
   const [color, setColor] = usePersistedState<Color>('order_color', null);
   const [packaging, setPackaging] = usePersistedState<'blank' | 'custom'>('order_packaging', 'blank');
@@ -56,6 +57,24 @@ export default function OrderPage() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null);
   const [showDefaultStickerPreview, setShowDefaultStickerPreview] = useState(false);
+
+  // Payment result banner after coming back from the Flitt checkout page
+  // (/api/flitt/return redirects here with ?payment=success|failed).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const payment = params.get('payment');
+    if (!payment) return;
+    if (payment === 'success') {
+      setSubmitResult({ success: true, message: 'Payment successful! Your order is confirmed.' });
+      // The order went through — the persisted form state is no longer needed.
+      ['order_size', 'order_color', 'order_packaging', 'order_quantity', 'order_info',
+        'order_stickerType', 'order_stickerLink', 'order_addOuterSleeve', 'order_outerSleeveLink',
+      ].forEach((key) => sessionStorage.removeItem(key));
+    } else {
+      setSubmitResult({ success: false, message: 'Payment was not completed. Please try again.' });
+    }
+    window.history.replaceState(null, '', window.location.pathname);
+  }, []);
 
   const parsedQty = typeof quantity === 'number' ? quantity : (parseInt(quantity as string) || 1);
   const parsedOsQty = addOuterSleeve ? parsedQty : 0;
@@ -104,6 +123,7 @@ export default function OrderPage() {
       outerSleeve: addOuterSleeve,
       outerSleeveLink,
       termsAccepted: agreed,
+      locale,
     };
 
     try {
@@ -117,6 +137,12 @@ export default function OrderPage() {
       });
       const result = await response.json();
       if (response.ok) {
+        if (result.checkoutUrl) {
+          // Hand the customer over to the Flitt payment page; the outcome is
+          // shown on return via the ?payment= query param.
+          window.location.href = result.checkoutUrl;
+          return;
+        }
         setSubmitResult({ success: true, message: `Order placed successfully! Order ID: ${result.orderId}` });
         // Optional: clear form after success
         setInfo({ name: '', lastName: '', phone: '', email: '' });
