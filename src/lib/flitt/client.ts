@@ -116,3 +116,44 @@ export async function verifyCallbackSignature(
   const expected = await buildSignature(payload, secretKey);
   return expected === received.toLowerCase();
 }
+
+const FLITT_STATUS_URL = 'https://pay.flitt.com/api/status/order_id';
+
+/**
+ * Fetches the authoritative order status from Flitt and verifies the
+ * response signature. Returns null when the order is unknown to Flitt or
+ * the response fails verification. Used as the source of truth when a
+ * callback payload can't be verified directly.
+ */
+export async function getVerifiedOrderStatus(
+  config: FlittConfig,
+  orderId: string,
+): Promise<Record<string, unknown> | null> {
+  const request: Record<string, unknown> = {
+    merchant_id: config.merchantId,
+    order_id: orderId,
+  };
+  request.signature = await buildSignature(request, config.secretKey);
+
+  const response = await fetch(FLITT_STATUS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ request }),
+  });
+  if (!response.ok) {
+    console.error(`Flitt status request failed with HTTP ${response.status}`);
+    return null;
+  }
+
+  const body = (await response.json()) as { response?: Record<string, unknown> };
+  const payload = body.response;
+  if (!payload || payload.response_status !== 'success') {
+    console.error('Flitt status request rejected:', payload?.error_message ?? 'no response');
+    return null;
+  }
+  if (!(await verifyCallbackSignature(payload, config.secretKey))) {
+    console.error('Flitt status response failed signature verification for order', orderId);
+    return null;
+  }
+  return payload;
+}

@@ -1,8 +1,25 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/src/lib/supabase/server';
-import { getFlittConfig, verifyCallbackSignature } from '@/src/lib/flitt/client';
+import {
+  getFlittConfig,
+  getVerifiedOrderStatus,
+  verifyCallbackSignature,
+} from '@/src/lib/flitt/client';
 
 export const runtime = 'edge';
+
+async function parseCallbackBody(request: Request): Promise<Record<string, unknown> | null> {
+  const contentType = request.headers.get('content-type') ?? '';
+  try {
+    if (contentType.includes('application/json')) {
+      return (await request.json()) as Record<string, unknown>;
+    }
+    const form = await request.formData();
+    return Object.fromEntries(form.entries());
+  } catch {
+    return null;
+  }
+}
 
 // Flitt server callback (host-to-host). Flitt retries on any non-200 response
 // (2s, 60s, 5m, 10m, 1h, 24h), so once the callback is authenticated we always
@@ -14,22 +31,30 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Flitt is not configured' }, { status: 500 });
   }
 
-  let payload: Record<string, unknown>;
-  try {
-    payload = await request.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  const body = await parseCallbackBody(request);
+  const orderId = typeof body?.order_id === 'string' ? body.order_id : null;
+  if (!body || !orderId) {
+    return NextResponse.json({ error: 'Missing order_id' }, { status: 400 });
   }
 
-  if (!(await verifyCallbackSignature(payload, config.secretKey))) {
-    console.error('Flitt callback signature mismatch for order', payload.order_id);
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+  // The callback payload is only trusted if its signature verifies. When it
+  // doesn't (Flitt callback payloads vary in shape), the callback is treated
+  // purely as a trigger and the authoritative, signed order status is fetched
+  // from Flitt's status API instead — that response cannot be forged.
+  let payload: Record<string, unknown> | null = null;
+  if (await verifyCallbackSignature(body, config.secretKey)) {
+    payload = body;
+  } else {
+    console.error('Flitt callback signature mismatch for order', orderId, '— falling back to status API');
+    payload = await getVerifiedOrderStatus(config, orderId);
+  }
+  if (!payload) {
+    return NextResponse.json({ error: 'Could not verify payment status' }, { status: 400 });
   }
 
-  const orderId = typeof payload.order_id === 'string' ? payload.order_id : null;
   const orderStatus = typeof payload.order_status === 'string' ? payload.order_status : null;
-  if (!orderId || !orderStatus) {
-    return NextResponse.json({ error: 'Missing order_id or order_status' }, { status: 400 });
+  if (!orderStatus) {
+    return NextResponse.json({ error: 'Missing order_status' }, { status: 400 });
   }
 
   // Intermediate statuses (created, processing) need no action.
