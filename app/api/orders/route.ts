@@ -151,39 +151,7 @@ export async function POST(request: Request) {
     }
   }
 
-  // Notification email. The order is already saved, so a failure here must
-  // not fail the request — it is logged and the order stays in the database.
-  const web3formsKey = process.env.WEB3FORMS_ACCESS_KEY;
-  if (web3formsKey) {
-    try {
-      const emailResponse = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          access_key: web3formsKey,
-          subject: `New Order ${order.id} - Firfita`,
-          'Order ID': order.id,
-          'First Name': firstName,
-          'Last Name': lastName ?? '',
-          'Email': email,
-          'Phone': phone,
-          'Size': size,
-          'Color': color,
-          'Quantity': quantity,
-          'Outer Sleeve': outerSleeve ? `Yes (${outerSleeveLink})` : 'No',
-          'Center Sticker': stickerType === 'custom' ? `Custom (${stickerLink})` : 'Firfita Default',
-          'Total Price': `${totalPrice} GEL`,
-        }),
-      });
-      if (!emailResponse.ok) {
-        console.error('Web3Forms notification failed:', await emailResponse.text());
-      }
-    } catch (emailError) {
-      console.error('Web3Forms notification failed:', emailError);
-    }
-  } else {
-    console.error('WEB3FORMS_ACCESS_KEY is not set; skipping order notification email');
-  }
-
+  // The notification email is sent from the client — Web3Forms' free plan
+  // rejects server-side API calls.
   return NextResponse.json({ orderId: order.id, total: totalPrice }, { status: 201 });
 }

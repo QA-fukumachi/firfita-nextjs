@@ -12,6 +12,46 @@ import {
 type Size = OrderSize | null;
 type Color = OrderColor | null;
 
+// Web3Forms access keys are public by design; the free plan only accepts
+// submissions from the browser, so the paid-order notification is sent from
+// the client after the customer returns from the Flitt checkout.
+const WEB3FORMS_ACCESS_KEY = '45e0a590-f72c-4d94-95a3-5f9cafeb5e91';
+const PENDING_NOTIFICATION_KEY = 'order_pending_notification';
+
+function sendOrderNotification(order: Record<string, unknown>, paid: boolean) {
+  fetch('https://api.web3forms.com/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      access_key: WEB3FORMS_ACCESS_KEY,
+      subject: `${paid ? 'PAID' : 'New'} Order ${order.orderId} - Firfita`,
+      'Order ID': order.orderId,
+      'First Name': order.firstName,
+      'Last Name': order.lastName ?? '',
+      'Email': order.email,
+      'Phone': order.phone,
+      'Size': order.size,
+      'Color': order.color,
+      'Quantity': order.quantity,
+      'Outer Sleeve': order.outerSleeve ? `Yes (${order.outerSleeveLink})` : 'No',
+      'Center Sticker': order.stickerType === 'custom' ? `Custom (${order.stickerLink})` : 'Firfita Default',
+      'Total Price': `${order.total} GEL`,
+    }),
+  }).catch((err) => console.error('Web3Forms notification failed:', err));
+}
+
+/** Sends the paid-order email from the snapshot stored before checkout. */
+function flushPendingNotification() {
+  const raw = sessionStorage.getItem(PENDING_NOTIFICATION_KEY);
+  if (!raw) return;
+  sessionStorage.removeItem(PENDING_NOTIFICATION_KEY);
+  try {
+    sendOrderNotification(JSON.parse(raw), true);
+  } catch {
+    // Corrupt snapshot — nothing to send.
+  }
+}
+
 function usePersistedState<T>(key: string, initialValue: T): [T, (val: T | ((prev: T) => T)) => void] {
   const [state, setState] = useState<T>(initialValue);
   const [mounted, setMounted] = useState(false);
@@ -66,6 +106,7 @@ export default function OrderPage() {
     if (!payment) return;
     if (payment === 'success') {
       setSubmitResult({ success: true, message: 'Payment successful! Your order is confirmed.' });
+      flushPendingNotification();
       // The order went through — the persisted form state is no longer needed.
       ['order_size', 'order_color', 'order_packaging', 'order_quantity', 'order_info',
         'order_stickerType', 'order_stickerLink', 'order_addOuterSleeve', 'order_outerSleeveLink',
@@ -137,12 +178,31 @@ export default function OrderPage() {
       });
       const result = await response.json();
       if (response.ok) {
+        const notification = {
+          orderId: result.orderId,
+          total: result.total,
+          firstName: info.name,
+          lastName: info.lastName,
+          email: info.email,
+          phone: info.phone,
+          size,
+          color,
+          quantity: parsedQty,
+          stickerType,
+          stickerLink,
+          outerSleeve: addOuterSleeve,
+          outerSleeveLink,
+        };
         if (result.checkoutUrl) {
+          // Snapshot the order for the notification email that the browser
+          // sends after a successful return from the payment page.
+          sessionStorage.setItem(PENDING_NOTIFICATION_KEY, JSON.stringify(notification));
           // Hand the customer over to the Flitt payment page; the outcome is
           // shown on return via the ?payment= query param.
           window.location.href = result.checkoutUrl;
           return;
         }
+        sendOrderNotification(notification, false);
         setSubmitResult({ success: true, message: `Order placed successfully! Order ID: ${result.orderId}` });
         // Optional: clear form after success
         setInfo({ name: '', lastName: '', phone: '', email: '' });

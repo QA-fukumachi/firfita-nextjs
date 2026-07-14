@@ -70,7 +70,9 @@ export async function POST(request: Request) {
 
   // Only transition orders that are still awaiting payment, so a late or
   // replayed callback can never downgrade a paid order.
-  const { data: order, error: updateError } = await supabase
+  // The paid-order notification email is sent from the customer's browser on
+  // return from checkout (Web3Forms' free plan rejects server-side calls).
+  const { error: updateError } = await supabase
     .from('orders')
     .update({
       status: newStatus,
@@ -78,72 +80,12 @@ export async function POST(request: Request) {
       ...(newStatus === 'paid' ? { paid_at: new Date().toISOString() } : {}),
     })
     .eq('id', orderId)
-    .eq('status', 'pending_payment')
-    .select('id, first_name, last_name, email, phone, size, color, quantity, sticker_type, sticker_link, outer_sleeve, outer_sleeve_link, total_price')
-    .maybeSingle();
+    .eq('status', 'pending_payment');
 
   if (updateError) {
     console.error('Flitt callback: order update failed:', updateError);
     return NextResponse.json({ error: 'Database update failed' }, { status: 500 });
   }
-  if (!order) {
-    // Unknown order id or already finalized — acknowledge to stop retries.
-    return NextResponse.json({ ok: true });
-  }
-
-  if (newStatus === 'paid') {
-    await sendPaidOrderNotification(order);
-  }
 
   return NextResponse.json({ ok: true });
-}
-
-// Same pattern as app/api/orders/route.ts: the status change is already
-// persisted, so a notification failure is logged, never surfaced to Flitt.
-async function sendPaidOrderNotification(order: {
-  id: string;
-  first_name: string;
-  last_name: string | null;
-  email: string;
-  phone: string;
-  size: string;
-  color: string;
-  quantity: number;
-  sticker_type: string;
-  sticker_link: string | null;
-  outer_sleeve: boolean;
-  outer_sleeve_link: string | null;
-  total_price: number;
-}) {
-  const web3formsKey = process.env.WEB3FORMS_ACCESS_KEY;
-  if (!web3formsKey) {
-    console.error('WEB3FORMS_ACCESS_KEY is not set; skipping paid order notification email');
-    return;
-  }
-  try {
-    const emailResponse = await fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({
-        access_key: web3formsKey,
-        subject: `PAID Order ${order.id} - Firfita`,
-        'Order ID': order.id,
-        'First Name': order.first_name,
-        'Last Name': order.last_name ?? '',
-        'Email': order.email,
-        'Phone': order.phone,
-        'Size': order.size,
-        'Color': order.color,
-        'Quantity': order.quantity,
-        'Outer Sleeve': order.outer_sleeve ? `Yes (${order.outer_sleeve_link})` : 'No',
-        'Center Sticker': order.sticker_type === 'custom' ? `Custom (${order.sticker_link})` : 'Firfita Default',
-        'Total Price': `${order.total_price} GEL`,
-      }),
-    });
-    if (!emailResponse.ok) {
-      console.error('Web3Forms paid notification failed:', await emailResponse.text());
-    }
-  } catch (emailError) {
-    console.error('Web3Forms paid notification failed:', emailError);
-  }
 }
