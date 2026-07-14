@@ -131,12 +131,14 @@ export async function POST(request: Request) {
         lifetime: 1800,
       });
 
-      const { error: payIdError } = await supabase
-        .from('orders')
-        .update({ flitt_payment_id: checkout.paymentId })
-        .eq('id', order.id);
-      if (payIdError) {
-        console.error('Failed to store Flitt payment id:', payIdError);
+      if (checkout.paymentId) {
+        const { error: payIdError } = await supabase
+          .from('orders')
+          .update({ flitt_payment_id: checkout.paymentId })
+          .eq('id', order.id);
+        if (payIdError) {
+          console.error('Failed to store Flitt payment id:', payIdError);
+        }
       }
 
       // The paid-order notification email is sent from the Flitt callback

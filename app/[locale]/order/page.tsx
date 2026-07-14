@@ -107,10 +107,17 @@ export default function OrderPage() {
     if (payment === 'success') {
       setSubmitResult({ success: true, message: 'Payment successful! Your order is confirmed.' });
       flushPendingNotification();
-      // The order went through — the persisted form state is no longer needed.
-      ['order_size', 'order_color', 'order_packaging', 'order_quantity', 'order_info',
-        'order_stickerType', 'order_stickerLink', 'order_addOuterSleeve', 'order_outerSleeveLink',
-      ].forEach((key) => sessionStorage.removeItem(key));
+      // The order went through — reset the form. Resetting the state (not
+      // just sessionStorage) matters: the persistence hooks write state back
+      // to sessionStorage on mount, so removed keys alone would reappear.
+      setInfo({ name: '', lastName: '', phone: '', email: '' });
+      setSize(null);
+      setColor(null);
+      setQuantity(1);
+      setAddOuterSleeve(false);
+      setStickerType('default');
+      setStickerLink('');
+      setOuterSleeveLink('');
     } else {
       setSubmitResult({ success: false, message: 'Payment was not completed. Please try again.' });
     }
@@ -198,7 +205,9 @@ export default function OrderPage() {
           // sends after a successful return from the payment page.
           sessionStorage.setItem(PENDING_NOTIFICATION_KEY, JSON.stringify(notification));
           // Hand the customer over to the Flitt payment page; the outcome is
-          // shown on return via the ?payment= query param.
+          // shown on return via the ?payment= query param. The submit button
+          // stays disabled (isSubmitting) while the browser navigates, so a
+          // second click can't create a duplicate order.
           window.location.href = result.checkoutUrl;
           return;
         }
@@ -213,15 +222,15 @@ export default function OrderPage() {
         setStickerType('default');
         setStickerLink('');
         setOuterSleeveLink('');
-        setQuantity(1);
       } else {
         setSubmitResult({ success: false, message: result.error || "Something went wrong" });
       }
     } catch {
       setSubmitResult({ success: false, message: "Network error, please try again." });
-    } finally {
-      setIsSubmitting(false);
     }
+    // Not in a finally: the checkout redirect path returns early above and
+    // must keep the button disabled until the browser leaves the page.
+    setIsSubmitting(false);
   };
 
   const images = {

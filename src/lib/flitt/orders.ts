@@ -37,12 +37,19 @@ export async function applyVerifiedPayload(payload: Record<string, unknown>): Pr
   const newStatus = mapOrderStatus(orderStatus);
   if (!newStatus) return;
 
+  // Never write an empty payment id: the column is UNIQUE, so a second empty
+  // string would violate the constraint and wedge the callback in retries.
+  const paymentId =
+    payload.payment_id != null && String(payload.payment_id) !== ''
+      ? String(payload.payment_id)
+      : null;
+
   const supabase = getSupabaseAdmin();
   const { error } = await supabase
     .from('orders')
     .update({
       status: newStatus,
-      flitt_payment_id: String(payload.payment_id ?? ''),
+      ...(paymentId ? { flitt_payment_id: paymentId } : {}),
       ...(newStatus === 'paid' ? { paid_at: new Date().toISOString() } : {}),
     })
     .eq('id', orderId)
