@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Montserrat, Open_Sans } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { getMessages, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/src/i18n/routing';
 import { Navbar } from '@/src/components/layout/Navbar';
 import { Footer } from '@/src/components/layout/Footer';
+import { SITE_URL, localeAlternates, ogLocale } from '@/src/lib/seo';
 import "../globals.css";
 
 const montserrat = Montserrat({
@@ -20,10 +21,40 @@ const openSans = Open_Sans({
 
 export const runtime = 'edge';
 
-export const metadata: Metadata = {
-  title: "Vinyl Record Cutting Service",
-  description: "Custom vinyl cutting from one-off to short runs.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'Metadata' });
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: t('home.title'),
+      template: `%s — ${t('siteName')}`,
+    },
+    description: t('home.description'),
+    alternates: localeAlternates(locale, ''),
+    openGraph: {
+      type: 'website',
+      siteName: t('siteName'),
+      locale: ogLocale(locale),
+      title: t('home.title'),
+      description: t('home.description'),
+      images: [
+        {
+          url: 'https://res.cloudinary.com/dqm1d4yua/image/upload/v1779888687/Frame_21_ifabsr.png',
+          alt: 'Firfita — custom vinyl record',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+    },
+  };
+}
 
 export default async function RootLayout({
   children,

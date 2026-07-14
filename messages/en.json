@@ -2,6 +2,25 @@
   "Global": {
     "title": "Vinyl Record Cutting Service"
   },
+  "Metadata": {
+    "siteName": "Firfita",
+    "home": {
+      "title": "Firfita — Custom Vinyl Record Cutting in Georgia",
+      "description": "Custom vinyl record cutting service in Tbilisi, Georgia. We cut your music onto 7\", 10\" and 12\" vinyl records — from one-off copies to short runs. Fast turnaround, premium sound."
+    },
+    "order": {
+      "title": "Order a Vinyl Record",
+      "description": "Order your custom vinyl record online: choose size, color, quantity and artwork. From a single copy to short runs, cut in Tbilisi, Georgia."
+    },
+    "pricing": {
+      "title": "Pricing",
+      "description": "Clear, straightforward pricing for custom vinyl records: 7\" from 55 GEL, 10\" from 80 GEL, 12\" from 100 GEL. Discounts on larger runs."
+    },
+    "services": {
+      "title": "Our Services",
+      "description": "Vinyl cutting for music lovers, DJs and musicians — one-off copies, short runs, custom stickers and printed sleeves."
+    }
+  },
   "Navbar": {
     "home": "HOME",
     "about": "ABOUT US",
