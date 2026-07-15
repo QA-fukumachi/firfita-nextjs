@@ -53,6 +53,9 @@ export async function generateMetadata({
     twitter: {
       card: 'summary_large_image',
     },
+    icons: {
+      icon: '/icon.png?v=2',
+    },
   };
 }
 
