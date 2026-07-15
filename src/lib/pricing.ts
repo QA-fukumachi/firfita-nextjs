@@ -2,11 +2,11 @@
 // and by /api/orders (authoritative recalculation — client totals are never
 // trusted). All amounts are GEL major units.
 
-export type Size = '7' | '10' | '12' | 'test1' | 'test15' | 'test05';
+export type Size = '7' | '10' | '12';
 export type Color = 'Red' | 'Transparent' | 'Black';
 export type StickerType = 'default' | 'custom';
 
-export const SIZES: Size[] = ['7', '10', '12', 'test1', 'test15', 'test05'];
+export const SIZES: Size[] = ['7', '10', '12'];
 export const COLORS: Color[] = ['Black', 'Red', 'Transparent'];
 
 export const CUSTOM_STICKER_PRICE = 8;
@@ -34,10 +34,6 @@ export function getVinylPricing(size: Size | null, qty: number): TierPrice {
     if (qty >= 11) return { base: 55, current: 45 };
     return { base: 55, current: 55 };
   }
-  if (size === 'test1') return { base: 1, current: 1 };
-  if (size === 'test15') return { base: 1.5, current: 1.5 };
-  if (size === 'test05') return { base: 0.5, current: 0.5 };
-
   return { base: 0, current: 0 };
 }
 

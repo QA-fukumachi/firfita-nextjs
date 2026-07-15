@@ -360,7 +360,7 @@ export default function OrderPage() {
           <section className="flex flex-col gap-6">
             <h2 className="font-display text-xl font-bold tracking-widest text-black">{t('step2')} <span className="text-sm lowercase font-body font-normal tracking-normal">({t('sizeHint')})</span></h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {(['7', '10', '12', 'test1', 'test15', 'test05'] as Size[]).map((s) => (
+              {(['7', '10', '12'] as Size[]).map((s) => (
                 <div 
                   key={s!}
                   onClick={() => setSize(s)}

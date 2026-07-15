@@ -95,21 +95,6 @@
       "desc": "სრული ალბომი, მაქსიმალური ხანგრძლივობა - 15 წთ.",
       "price": "100 GEL"
     },
-    "sizetest1": {
-      "title": "TEST 1 GEL",
-      "desc": "სატესტო პროდუქტი 1 ლარად",
-      "price": "1 GEL"
-    },
-    "sizetest15": {
-      "title": "TEST 1.50 GEL",
-      "desc": "სატესტო პროდუქტი 1.50 ლარად",
-      "price": "1.50 GEL"
-    },
-    "sizetest05": {
-      "title": "TEST 0.50 GEL",
-      "desc": "სატესტო პროდუქტი 0.50 ლარად",
-      "price": "0.50 GEL"
-    },
     "step3": "3. ფერი",
     "colorRed": "წითელი",
     "colorTransparent": "გამჭვირვალე",

@@ -95,21 +95,6 @@
       "desc": "Full album experience, maximum music length on each side — 15 min.",
       "price": "100 GEL"
     },
-    "sizetest1": {
-      "title": "TEST 1 GEL",
-      "desc": "Test Product for 1 GEL",
-      "price": "1 GEL"
-    },
-    "sizetest15": {
-      "title": "TEST 1.50 GEL",
-      "desc": "Test Product for 1.50 GEL",
-      "price": "1.50 GEL"
-    },
-    "sizetest05": {
-      "title": "TEST 0.50 GEL",
-      "desc": "Test Product for 0.50 GEL",
-      "price": "0.50 GEL"
-    },
     "step3": "3. VINYL COLOR",
     "colorRed": "Red",
     "colorTransparent": "Transparent",
