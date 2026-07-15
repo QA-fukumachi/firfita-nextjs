@@ -5,12 +5,20 @@
 export type Size = '7' | '10' | '12';
 export type Color = 'Red' | 'Transparent' | 'Black';
 export type StickerType = 'default' | 'custom';
+export type ManufacturingTime = 'standard' | 'express';
+export type Delivery = 'tbilisi' | 'regions';
 
 export const SIZES: Size[] = ['7', '10', '12'];
 export const COLORS: Color[] = ['Black', 'Red', 'Transparent'];
+export const MANUFACTURING_TIMES: ManufacturingTime[] = ['standard', 'express'];
+export const DELIVERIES: Delivery[] = ['tbilisi', 'regions'];
 
 export const CUSTOM_STICKER_PRICE = 8;
 export const COLOR_SURCHARGE = 20;
+// Flat delivery fee in GEL, not per unit.
+export const DELIVERY_PRICES: Record<Delivery, number> = { tbilisi: 15, regions: 25 };
+// Express manufacturing (24-48h) is only possible for small runs.
+export const EXPRESS_MAX_QUANTITY = 2;
 
 export interface TierPrice {
   base: number;
@@ -62,6 +70,7 @@ export interface OrderSpec {
   quantity: number;
   stickerType: StickerType;
   outerSleeve: boolean;
+  delivery: Delivery;
 }
 
 export function calculateTotal(spec: OrderSpec): number {
@@ -80,6 +89,8 @@ export function calculateTotal(spec: OrderSpec): number {
   if (spec.color === 'Transparent' || spec.color === 'Red') {
     total += COLOR_SURCHARGE * spec.quantity;
   }
+
+  total += DELIVERY_PRICES[spec.delivery];
 
   return total;
 }

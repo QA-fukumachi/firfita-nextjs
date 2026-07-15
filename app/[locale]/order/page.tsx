@@ -5,8 +5,12 @@ import { useLocale, useTranslations } from 'next-intl';
 import {
   getVinylPricing,
   getSleevePricing,
+  DELIVERY_PRICES,
+  EXPRESS_MAX_QUANTITY,
   type Size as OrderSize,
   type Color as OrderColor,
+  type ManufacturingTime,
+  type Delivery,
 } from '@/src/lib/pricing';
 
 type Size = OrderSize | null;
@@ -35,6 +39,8 @@ function sendOrderNotification(order: Record<string, unknown>, paid: boolean) {
       'Quantity': order.quantity,
       'Outer Sleeve': order.outerSleeve ? `Yes (${order.outerSleeveLink})` : 'No',
       'Center Sticker': order.stickerType === 'custom' ? `Custom (${order.stickerLink})` : 'Firfita Default',
+      'Manufacturing': order.manufacturingTime === 'express' ? 'Express (24-48h)' : 'Standard (5-10 days)',
+      'Delivery': order.delivery === 'regions' ? 'Regions (+25 GEL)' : 'Tbilisi (+15 GEL)',
       'Total Price': `${order.total} GEL`,
     }),
   }).catch((err) => console.error('Web3Forms notification failed:', err));
@@ -90,6 +96,8 @@ export default function OrderPage() {
   const [stickerLink, setStickerLink] = usePersistedState('order_stickerLink', '');
   const [addOuterSleeve, setAddOuterSleeve] = usePersistedState<boolean>('order_addOuterSleeve', false);
   const [outerSleeveLink, setOuterSleeveLink] = usePersistedState('order_outerSleeveLink', '');
+  const [manufacturingTime, setManufacturingTime] = usePersistedState<ManufacturingTime>('order_manufacturingTime', 'standard');
+  const [delivery, setDelivery] = usePersistedState<Delivery | null>('order_delivery', null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -118,6 +126,8 @@ export default function OrderPage() {
       setStickerType('default');
       setStickerLink('');
       setOuterSleeveLink('');
+      setManufacturingTime('standard');
+      setDelivery(null);
     } else {
       setSubmitResult({ success: false, message: 'Payment was not completed. Please try again.' });
     }
@@ -126,6 +136,15 @@ export default function OrderPage() {
 
   const parsedQty = typeof quantity === 'number' ? quantity : (parseInt(quantity as string) || 1);
   const parsedOsQty = addOuterSleeve ? parsedQty : 0;
+  const expressAvailable = parsedQty <= EXPRESS_MAX_QUANTITY;
+
+  // Express manufacturing is only possible for small runs: if the quantity
+  // grows past the limit while express is selected, fall back to standard.
+  useEffect(() => {
+    if (!expressAvailable && manufacturingTime === 'express') {
+      setManufacturingTime('standard');
+    }
+  }, [expressAvailable, manufacturingTime, setManufacturingTime]);
 
   const vinylPricing = getVinylPricing(size, parsedQty);
   const sleevePricing = getSleevePricing(size, parsedOsQty);
@@ -145,11 +164,15 @@ export default function OrderPage() {
       total += 20 * parsedQty;
     }
 
+    if (delivery) {
+      total += DELIVERY_PRICES[delivery];
+    }
+
     return total;
   };
 
   const handleSubmit = async () => {
-    if (!size || !color || !info.name || !info.phone || !info.email.includes('@') || (addOuterSleeve && !outerSleeveLink.trim()) || (stickerType === 'custom' && !stickerLink.trim())) {
+    if (!size || !color || !delivery || !info.name || !info.phone || !info.email.includes('@') || (addOuterSleeve && !outerSleeveLink.trim()) || (stickerType === 'custom' && !stickerLink.trim())) {
       setShowErrors(true);
       return;
     }
@@ -170,6 +193,8 @@ export default function OrderPage() {
       stickerLink,
       outerSleeve: addOuterSleeve,
       outerSleeveLink,
+      manufacturingTime,
+      delivery,
       termsAccepted: agreed,
       locale,
     };
@@ -199,6 +224,8 @@ export default function OrderPage() {
           stickerLink,
           outerSleeve: addOuterSleeve,
           outerSleeveLink,
+          manufacturingTime,
+          delivery,
         };
         if (result.checkoutUrl) {
           // Snapshot the order for the notification email that the browser
@@ -222,6 +249,8 @@ export default function OrderPage() {
         setStickerType('default');
         setStickerLink('');
         setOuterSleeveLink('');
+        setManufacturingTime('standard');
+        setDelivery(null);
       } else {
         setSubmitResult({ success: false, message: result.error || "Something went wrong" });
       }
@@ -511,6 +540,45 @@ export default function OrderPage() {
              </div>
           </section>
 
+          {/* STEP 6: MANUFACTURING TIME */}
+          <section className="flex flex-col gap-6">
+             <h2 className="font-display text-xl font-bold tracking-widest text-black">{t('stepManufacturing')}</h2>
+             <div className="flex flex-col sm:flex-row gap-4">
+               <button
+                 onClick={() => setManufacturingTime('standard')}
+                 className={`flex-1 py-4 px-6 border-2 transition-all font-display tracking-widest text-sm font-bold uppercase flex flex-col items-center justify-center ${manufacturingTime === 'standard' ? 'border-black bg-black text-white' : 'border-gray-200 text-black hover:border-black'}`}
+               >
+                 {t('manufacturingStandard')} <span className={`block text-xs font-normal lowercase mt-1 ${manufacturingTime === 'standard' ? 'text-white/80' : 'text-gray-500'}`}>{t('manufacturingStandardTime')}</span>
+               </button>
+               <button
+                 onClick={() => setManufacturingTime('express')}
+                 disabled={!expressAvailable}
+                 className={`flex-1 py-4 px-6 border-2 transition-all font-display tracking-widest text-sm font-bold uppercase flex flex-col items-center justify-center ${!expressAvailable ? 'border-gray-200 text-gray-300 cursor-not-allowed' : manufacturingTime === 'express' ? 'border-black bg-black text-white' : 'border-gray-200 text-black hover:border-black'}`}
+               >
+                 {t('manufacturingExpress')} <span className={`block text-xs font-normal lowercase mt-1 ${!expressAvailable ? 'text-gray-300' : manufacturingTime === 'express' ? 'text-white/80' : 'text-gray-500'}`}>{t('manufacturingExpressTime')}</span>
+               </button>
+             </div>
+             {!expressAvailable && (
+               <p className="text-sm text-gray-500">{t('expressLimitNote')}</p>
+             )}
+          </section>
+
+          {/* STEP 7: DELIVERY */}
+          <section className="flex flex-col gap-6">
+             <h2 className="font-display text-xl font-bold tracking-widest text-black">{t('stepDelivery')}</h2>
+             <div className="flex flex-col sm:flex-row gap-4">
+               {(['tbilisi', 'regions'] as Delivery[]).map((d) => (
+                 <button
+                   key={d}
+                   onClick={() => setDelivery(d)}
+                   className={`flex-1 py-4 px-6 border-2 transition-all font-display tracking-widest text-sm font-bold uppercase flex flex-col items-center justify-center ${delivery === d ? 'border-black bg-black text-white' : showErrors && !delivery ? 'border-red-500 bg-red-50 text-black hover:border-red-600' : 'border-gray-200 text-black hover:border-black'}`}
+                 >
+                   {t(d === 'tbilisi' ? 'deliveryTbilisi' : 'deliveryRegions')} <span className={`block text-xs font-bold normal-case mt-1 ${delivery === d ? 'text-white/80' : 'text-gray-500'}`}>(+{DELIVERY_PRICES[d]} GEL)</span>
+                 </button>
+               ))}
+             </div>
+          </section>
+
         </div>
 
         {/* RIGHT: STICKY SUMMARY PANEL */}
@@ -629,6 +697,24 @@ export default function OrderPage() {
                   <div className="flex flex-col items-end shrink-0 pl-2">
                     <span className="font-display text-lg font-bold text-white">
                       + {(20 * parsedQty).toLocaleString('en-US').replace(/,/g, ' ')} GEL
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {delivery && (
+                <div className="flex items-start justify-between mt-4 gap-4 w-full">
+                  <div className="flex flex-col min-w-0 flex-1 gap-1">
+                    <span className="font-display font-bold text-white text-base md:text-lg break-words leading-tight">
+                      {t('deliveryLabel')}
+                    </span>
+                    <span className="font-display text-gray-400 text-sm">
+                      {t(delivery === 'tbilisi' ? 'deliveryTbilisi' : 'deliveryRegions')}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-end shrink-0 pl-2">
+                    <span className="font-display text-lg font-bold text-white">
+                      + {DELIVERY_PRICES[delivery]} GEL
                     </span>
                   </div>
                 </div>

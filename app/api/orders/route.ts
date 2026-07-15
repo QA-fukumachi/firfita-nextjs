@@ -6,9 +6,13 @@ import {
   getVinylPricing,
   SIZES,
   COLORS,
+  DELIVERIES,
+  EXPRESS_MAX_QUANTITY,
   type Size,
   type Color,
   type StickerType,
+  type ManufacturingTime,
+  type Delivery,
 } from '@/src/lib/pricing';
 
 export const runtime = 'edge';
@@ -25,6 +29,8 @@ interface OrderRequestBody {
   stickerLink?: string;
   outerSleeve?: boolean;
   outerSleeveLink?: string;
+  manufacturingTime?: string;
+  delivery?: string;
   termsAccepted?: boolean;
   locale?: string;
 }
@@ -73,9 +79,20 @@ export async function POST(request: Request) {
     return validationError('Outer sleeve design link is required');
   }
 
+  const manufacturingTime: ManufacturingTime =
+    body.manufacturingTime === 'express' ? 'express' : 'standard';
+  if (manufacturingTime === 'express' && quantity > EXPRESS_MAX_QUANTITY) {
+    return validationError(`Express manufacturing is only available for up to ${EXPRESS_MAX_QUANTITY} discs`);
+  }
+
+  if (!body.delivery || !DELIVERIES.includes(body.delivery as Delivery)) {
+    return validationError('Invalid delivery option');
+  }
+  const delivery = body.delivery as Delivery;
+
   // Authoritative pricing — the client never sends amounts.
   const unitPrice = getVinylPricing(size, quantity).current;
-  const totalPrice = calculateTotal({ size, color, quantity, stickerType, outerSleeve });
+  const totalPrice = calculateTotal({ size, color, quantity, stickerType, outerSleeve, delivery });
 
   // When Flitt credentials are configured the order goes through online
   // payment; otherwise it falls back to the original email-only flow.
@@ -99,6 +116,8 @@ export async function POST(request: Request) {
       sticker_link: stickerLink,
       outer_sleeve: outerSleeve,
       outer_sleeve_link: outerSleeveLink,
+      manufacturing_time: manufacturingTime,
+      delivery,
       unit_price: unitPrice,
       total_price: totalPrice,
       currency: 'GEL',
