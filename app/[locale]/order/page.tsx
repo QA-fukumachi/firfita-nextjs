@@ -41,6 +41,10 @@ function sendOrderNotification(order: Record<string, unknown>, paid: boolean) {
       'Center Sticker': order.stickerType === 'custom' ? `Custom (${order.stickerLink})` : 'Firfita Default',
       'Manufacturing': order.manufacturingTime === 'express' ? 'Express (24-48h)' : 'Standard (5-10 days)',
       'Delivery': order.delivery === 'regions' ? 'Regions (+25 GEL)' : 'Tbilisi (+15 GEL)',
+      'Delivery Address': [order.addrLabel, order.addrRegion, order.addrCity, order.addrDistrict, order.addrAddress]
+        .filter(Boolean).join(', '),
+      'Recipient': `${order.addrRecipient} (${order.addrPhone})`,
+      'Courier Comment': order.addrComment || '-',
       'Total Price': `${order.total} GEL`,
     }),
   }).catch((err) => console.error('Web3Forms notification failed:', err));
@@ -98,6 +102,9 @@ export default function OrderPage() {
   const [outerSleeveLink, setOuterSleeveLink] = usePersistedState('order_outerSleeveLink', '');
   const [manufacturingTime, setManufacturingTime] = usePersistedState<ManufacturingTime>('order_manufacturingTime', 'standard');
   const [delivery, setDelivery] = usePersistedState<Delivery | null>('order_delivery', null);
+  const [deliveryAddress, setDeliveryAddress] = usePersistedState('order_deliveryAddress', {
+    label: '', region: '', city: '', district: '', address: '', recipient: '', phone: '', comment: '',
+  });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -128,6 +135,7 @@ export default function OrderPage() {
       setOuterSleeveLink('');
       setManufacturingTime('standard');
       setDelivery(null);
+      setDeliveryAddress({ label: '', region: '', city: '', district: '', address: '', recipient: '', phone: '', comment: '' });
     } else {
       setSubmitResult({ success: false, message: 'Payment was not completed. Please try again.' });
     }
@@ -171,8 +179,18 @@ export default function OrderPage() {
     return total;
   };
 
+  // Which address fields are required depends on the delivery zone.
+  const deliveryAddressValid =
+    !!delivery &&
+    !!deliveryAddress.address.trim() &&
+    !!deliveryAddress.recipient.trim() &&
+    !!deliveryAddress.phone.trim() &&
+    (delivery === 'tbilisi'
+      ? !!deliveryAddress.district.trim()
+      : !!deliveryAddress.region.trim() && !!deliveryAddress.city.trim());
+
   const handleSubmit = async () => {
-    if (!size || !color || !delivery || !info.name || !info.phone || !info.email.includes('@') || (addOuterSleeve && !outerSleeveLink.trim()) || (stickerType === 'custom' && !stickerLink.trim())) {
+    if (!size || !color || !delivery || !deliveryAddressValid || !info.name || !info.phone || !info.email.includes('@') || (addOuterSleeve && !outerSleeveLink.trim()) || (stickerType === 'custom' && !stickerLink.trim())) {
       setShowErrors(true);
       return;
     }
@@ -195,6 +213,14 @@ export default function OrderPage() {
       outerSleeveLink,
       manufacturingTime,
       delivery,
+      deliveryLabel: deliveryAddress.label,
+      deliveryRegion: deliveryAddress.region,
+      deliveryCity: deliveryAddress.city,
+      deliveryDistrict: deliveryAddress.district,
+      deliveryAddress: deliveryAddress.address,
+      deliveryRecipient: deliveryAddress.recipient,
+      deliveryPhone: deliveryAddress.phone,
+      deliveryComment: deliveryAddress.comment,
       termsAccepted: agreed,
       locale,
     };
@@ -226,6 +252,14 @@ export default function OrderPage() {
           outerSleeveLink,
           manufacturingTime,
           delivery,
+          addrLabel: deliveryAddress.label,
+          addrRegion: deliveryAddress.region,
+          addrCity: deliveryAddress.city,
+          addrDistrict: deliveryAddress.district,
+          addrAddress: deliveryAddress.address,
+          addrRecipient: deliveryAddress.recipient,
+          addrPhone: deliveryAddress.phone,
+          addrComment: deliveryAddress.comment,
         };
         if (result.checkoutUrl) {
           // Snapshot the order for the notification email that the browser
@@ -251,6 +285,7 @@ export default function OrderPage() {
         setOuterSleeveLink('');
         setManufacturingTime('standard');
         setDelivery(null);
+        setDeliveryAddress({ label: '', region: '', city: '', district: '', address: '', recipient: '', phone: '', comment: '' });
       } else {
         setSubmitResult({ success: false, message: result.error || "Something went wrong" });
       }
@@ -577,6 +612,70 @@ export default function OrderPage() {
                  </button>
                ))}
              </div>
+             {delivery && (
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                 <input
+                   type="text"
+                   placeholder={`${t('addrLabel')} (${t('optional')})`}
+                   value={deliveryAddress.label}
+                   onChange={e => setDeliveryAddress(prev => ({ ...prev, label: e.target.value }))}
+                   className="bg-transparent border-b py-3 outline-none transition-all text-base border-gray-300 focus:border-black placeholder-gray-400"
+                 />
+                 {delivery === 'regions' && (
+                   <>
+                     <input
+                       type="text"
+                       placeholder={t('addrRegion')}
+                       value={deliveryAddress.region}
+                       onChange={e => setDeliveryAddress(prev => ({ ...prev, region: e.target.value }))}
+                       className={`bg-transparent border-b py-3 outline-none transition-all text-base ${showErrors && !deliveryAddress.region.trim() ? 'border-red-500 placeholder-red-300' : 'border-gray-300 focus:border-black placeholder-gray-400'}`}
+                     />
+                     <input
+                       type="text"
+                       placeholder={t('addrCity')}
+                       value={deliveryAddress.city}
+                       onChange={e => setDeliveryAddress(prev => ({ ...prev, city: e.target.value }))}
+                       className={`bg-transparent border-b py-3 outline-none transition-all text-base ${showErrors && !deliveryAddress.city.trim() ? 'border-red-500 placeholder-red-300' : 'border-gray-300 focus:border-black placeholder-gray-400'}`}
+                     />
+                   </>
+                 )}
+                 <input
+                   type="text"
+                   placeholder={delivery === 'tbilisi' ? t('addrDistrict') : `${t('addrDistrict')} (${t('optional')})`}
+                   value={deliveryAddress.district}
+                   onChange={e => setDeliveryAddress(prev => ({ ...prev, district: e.target.value }))}
+                   className={`bg-transparent border-b py-3 outline-none transition-all text-base ${showErrors && delivery === 'tbilisi' && !deliveryAddress.district.trim() ? 'border-red-500 placeholder-red-300' : 'border-gray-300 focus:border-black placeholder-gray-400'}`}
+                 />
+                 <input
+                   type="text"
+                   placeholder={t('addrAddress')}
+                   value={deliveryAddress.address}
+                   onChange={e => setDeliveryAddress(prev => ({ ...prev, address: e.target.value }))}
+                   className={`bg-transparent border-b py-3 outline-none transition-all text-base ${showErrors && !deliveryAddress.address.trim() ? 'border-red-500 placeholder-red-300' : 'border-gray-300 focus:border-black placeholder-gray-400'}`}
+                 />
+                 <input
+                   type="text"
+                   placeholder={t('addrRecipient')}
+                   value={deliveryAddress.recipient}
+                   onChange={e => setDeliveryAddress(prev => ({ ...prev, recipient: e.target.value }))}
+                   className={`bg-transparent border-b py-3 outline-none transition-all text-base ${showErrors && !deliveryAddress.recipient.trim() ? 'border-red-500 placeholder-red-300' : 'border-gray-300 focus:border-black placeholder-gray-400'}`}
+                 />
+                 <input
+                   type="tel"
+                   placeholder={t('addrPhone')}
+                   value={deliveryAddress.phone}
+                   onChange={e => setDeliveryAddress(prev => ({ ...prev, phone: e.target.value }))}
+                   className={`bg-transparent border-b py-3 outline-none transition-all text-base ${showErrors && !deliveryAddress.phone.trim() ? 'border-red-500 placeholder-red-300' : 'border-gray-300 focus:border-black placeholder-gray-400'}`}
+                 />
+                 <input
+                   type="text"
+                   placeholder={`${t('addrComment')} (${t('optional')})`}
+                   value={deliveryAddress.comment}
+                   onChange={e => setDeliveryAddress(prev => ({ ...prev, comment: e.target.value }))}
+                   className="bg-transparent border-b py-3 outline-none transition-all text-base border-gray-300 focus:border-black placeholder-gray-400 md:col-span-2"
+                 />
+               </div>
+             )}
           </section>
 
         </div>

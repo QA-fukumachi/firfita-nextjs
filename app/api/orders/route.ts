@@ -31,6 +31,14 @@ interface OrderRequestBody {
   outerSleeveLink?: string;
   manufacturingTime?: string;
   delivery?: string;
+  deliveryLabel?: string;
+  deliveryRegion?: string;
+  deliveryCity?: string;
+  deliveryDistrict?: string;
+  deliveryAddress?: string;
+  deliveryRecipient?: string;
+  deliveryPhone?: string;
+  deliveryComment?: string;
   termsAccepted?: boolean;
   locale?: string;
 }
@@ -90,6 +98,24 @@ export async function POST(request: Request) {
   }
   const delivery = body.delivery as Delivery;
 
+  // Address requirements depend on the delivery zone (label and courier
+  // comment are always optional; district is optional for regions).
+  const deliveryLabel = body.deliveryLabel?.trim() || null;
+  const deliveryRegion = delivery === 'regions' ? body.deliveryRegion?.trim() : null;
+  const deliveryCity = delivery === 'regions' ? body.deliveryCity?.trim() : null;
+  const deliveryDistrict = body.deliveryDistrict?.trim() || null;
+  const deliveryAddress = body.deliveryAddress?.trim();
+  const deliveryRecipient = body.deliveryRecipient?.trim();
+  const deliveryPhone = body.deliveryPhone?.trim();
+  const deliveryComment = body.deliveryComment?.trim() || null;
+
+  if (delivery === 'tbilisi' && !deliveryDistrict) return validationError('District is required');
+  if (delivery === 'regions' && !deliveryRegion) return validationError('Region is required');
+  if (delivery === 'regions' && !deliveryCity) return validationError('City is required');
+  if (!deliveryAddress) return validationError('Delivery address is required');
+  if (!deliveryRecipient) return validationError('Recipient name is required');
+  if (!deliveryPhone) return validationError('Recipient phone is required');
+
   // Authoritative pricing — the client never sends amounts.
   const unitPrice = getVinylPricing(size, quantity).current;
   const totalPrice = calculateTotal({ size, color, quantity, stickerType, outerSleeve, delivery });
@@ -118,6 +144,14 @@ export async function POST(request: Request) {
       outer_sleeve_link: outerSleeveLink,
       manufacturing_time: manufacturingTime,
       delivery,
+      delivery_label: deliveryLabel,
+      delivery_region: deliveryRegion || null,
+      delivery_city: deliveryCity || null,
+      delivery_district: deliveryDistrict,
+      delivery_address: deliveryAddress,
+      delivery_recipient: deliveryRecipient,
+      delivery_phone: deliveryPhone,
+      delivery_comment: deliveryComment,
       unit_price: unitPrice,
       total_price: totalPrice,
       currency: 'GEL',
