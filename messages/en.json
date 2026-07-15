@@ -124,6 +124,8 @@
     "stepDelivery": "7. DELIVERY",
     "deliveryTbilisi": "Tbilisi",
     "deliveryRegions": "Regions",
+    "deliveryPickup": "Pickup",
+    "free": "Free",
     "deliveryLabel": "Delivery",
     "addrLabel": "Name (e.g. home, work)",
     "addrRegion": "Region",

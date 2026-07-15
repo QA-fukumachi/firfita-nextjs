@@ -100,21 +100,25 @@ export async function POST(request: Request) {
 
   // Address requirements depend on the delivery zone (label and courier
   // comment are always optional; district is optional for regions).
-  const deliveryLabel = body.deliveryLabel?.trim() || null;
+  // Pickup needs no address at all — the delivery_* fields stay null.
+  const isPickup = delivery === 'pickup';
+  const deliveryLabel = isPickup ? null : body.deliveryLabel?.trim() || null;
   const deliveryRegion = delivery === 'regions' ? body.deliveryRegion?.trim() : null;
   const deliveryCity = delivery === 'regions' ? body.deliveryCity?.trim() : null;
-  const deliveryDistrict = body.deliveryDistrict?.trim() || null;
-  const deliveryAddress = body.deliveryAddress?.trim();
-  const deliveryRecipient = body.deliveryRecipient?.trim();
-  const deliveryPhone = body.deliveryPhone?.trim();
-  const deliveryComment = body.deliveryComment?.trim() || null;
+  const deliveryDistrict = isPickup ? null : body.deliveryDistrict?.trim() || null;
+  const deliveryAddress = isPickup ? null : body.deliveryAddress?.trim();
+  const deliveryRecipient = isPickup ? null : body.deliveryRecipient?.trim();
+  const deliveryPhone = isPickup ? null : body.deliveryPhone?.trim();
+  const deliveryComment = isPickup ? null : body.deliveryComment?.trim() || null;
 
   if (delivery === 'tbilisi' && !deliveryDistrict) return validationError('District is required');
   if (delivery === 'regions' && !deliveryRegion) return validationError('Region is required');
   if (delivery === 'regions' && !deliveryCity) return validationError('City is required');
-  if (!deliveryAddress) return validationError('Delivery address is required');
-  if (!deliveryRecipient) return validationError('Recipient name is required');
-  if (!deliveryPhone) return validationError('Recipient phone is required');
+  if (!isPickup) {
+    if (!deliveryAddress) return validationError('Delivery address is required');
+    if (!deliveryRecipient) return validationError('Recipient name is required');
+    if (!deliveryPhone) return validationError('Recipient phone is required');
+  }
 
   // Authoritative pricing — the client never sends amounts.
   const unitPrice = getVinylPricing(size, quantity).current;
@@ -148,9 +152,9 @@ export async function POST(request: Request) {
       delivery_region: deliveryRegion || null,
       delivery_city: deliveryCity || null,
       delivery_district: deliveryDistrict,
-      delivery_address: deliveryAddress,
-      delivery_recipient: deliveryRecipient,
-      delivery_phone: deliveryPhone,
+      delivery_address: deliveryAddress || null,
+      delivery_recipient: deliveryRecipient || null,
+      delivery_phone: deliveryPhone || null,
       delivery_comment: deliveryComment,
       unit_price: unitPrice,
       total_price: totalPrice,

@@ -41,11 +41,13 @@ function sendOrderNotification(order: Record<string, unknown>, paid: boolean) {
       'Outer Sleeve': order.outerSleeve ? `Yes (${order.outerSleeveLink})` : 'No',
       'Center Sticker': order.stickerType === 'custom' ? `Custom (${order.stickerLink})` : 'Firfita Default',
       'Manufacturing': order.manufacturingTime === 'express' ? 'Express (24-48h, +100 GEL)' : 'Standard (5-10 days)',
-      'Delivery': order.delivery === 'regions' ? 'Regions (+25 GEL)' : 'Tbilisi (+15 GEL)',
-      'Delivery Address': [order.addrLabel, order.addrRegion, order.addrCity, order.addrDistrict, order.addrAddress]
-        .filter(Boolean).join(', '),
-      'Recipient': `${order.addrRecipient} (${order.addrPhone})`,
-      'Courier Comment': order.addrComment || '-',
+      'Delivery': order.delivery === 'pickup' ? 'Pickup (free)'
+        : order.delivery === 'regions' ? 'Regions (+25 GEL)' : 'Tbilisi (+15 GEL)',
+      'Delivery Address': order.delivery === 'pickup' ? '-'
+        : [order.addrLabel, order.addrRegion, order.addrCity, order.addrDistrict, order.addrAddress]
+            .filter(Boolean).join(', '),
+      'Recipient': order.delivery === 'pickup' ? '-' : `${order.addrRecipient} (${order.addrPhone})`,
+      'Courier Comment': (order.delivery !== 'pickup' && order.addrComment) || '-',
       'Total Price': `${order.total} GEL`,
     }),
   }).catch((err) => console.error('Web3Forms notification failed:', err));
@@ -184,15 +186,17 @@ export default function OrderPage() {
     return total;
   };
 
-  // Which address fields are required depends on the delivery zone.
+  // Which address fields are required depends on the delivery zone;
+  // pickup needs no address at all.
   const deliveryAddressValid =
     !!delivery &&
-    !!deliveryAddress.address.trim() &&
-    !!deliveryAddress.recipient.trim() &&
-    !!deliveryAddress.phone.trim() &&
-    (delivery === 'tbilisi'
-      ? !!deliveryAddress.district.trim()
-      : !!deliveryAddress.region.trim() && !!deliveryAddress.city.trim());
+    (delivery === 'pickup' ||
+      (!!deliveryAddress.address.trim() &&
+        !!deliveryAddress.recipient.trim() &&
+        !!deliveryAddress.phone.trim() &&
+        (delivery === 'tbilisi'
+          ? !!deliveryAddress.district.trim()
+          : !!deliveryAddress.region.trim() && !!deliveryAddress.city.trim())));
 
   const handleSubmit = async () => {
     if (!size || !color || !delivery || !deliveryAddressValid || !info.name || !info.phone || !info.email.includes('@') || (addOuterSleeve && !outerSleeveLink.trim()) || (stickerType === 'custom' && !stickerLink.trim())) {
@@ -607,17 +611,17 @@ export default function OrderPage() {
           <section className="flex flex-col gap-6">
              <h2 className="font-display text-xl font-bold tracking-widest text-black">{t('stepDelivery')}</h2>
              <div className="flex flex-col sm:flex-row gap-4">
-               {(['tbilisi', 'regions'] as Delivery[]).map((d) => (
+               {(['tbilisi', 'regions', 'pickup'] as Delivery[]).map((d) => (
                  <button
                    key={d}
                    onClick={() => setDelivery(d)}
                    className={`flex-1 py-4 px-6 border-2 transition-all font-display tracking-widest text-sm font-bold uppercase flex flex-col items-center justify-center ${delivery === d ? 'border-black bg-black text-white' : showErrors && !delivery ? 'border-red-500 bg-red-50 text-black hover:border-red-600' : 'border-gray-200 text-black hover:border-black'}`}
                  >
-                   {t(d === 'tbilisi' ? 'deliveryTbilisi' : 'deliveryRegions')} <span className={`block text-xs font-bold normal-case mt-1 ${delivery === d ? 'text-white/80' : 'text-gray-500'}`}>(+{DELIVERY_PRICES[d]} GEL)</span>
+                   {t(d === 'tbilisi' ? 'deliveryTbilisi' : d === 'regions' ? 'deliveryRegions' : 'deliveryPickup')} <span className={`block text-xs font-bold normal-case mt-1 ${delivery === d ? 'text-white/80' : 'text-gray-500'}`}>{d === 'pickup' ? `(${t('free')})` : `(+${DELIVERY_PRICES[d]} GEL)`}</span>
                  </button>
                ))}
              </div>
-             {delivery && (
+             {delivery && delivery !== 'pickup' && (
                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                  <input
                    type="text"
@@ -831,12 +835,12 @@ export default function OrderPage() {
                       {t('deliveryLabel')}
                     </span>
                     <span className="font-display text-gray-400 text-sm">
-                      {t(delivery === 'tbilisi' ? 'deliveryTbilisi' : 'deliveryRegions')}
+                      {t(delivery === 'tbilisi' ? 'deliveryTbilisi' : delivery === 'regions' ? 'deliveryRegions' : 'deliveryPickup')}
                     </span>
                   </div>
                   <div className="flex flex-col items-end shrink-0 pl-2">
                     <span className="font-display text-lg font-bold text-white">
-                      + {DELIVERY_PRICES[delivery]} GEL
+                      {delivery === 'pickup' ? t('free') : `+ ${DELIVERY_PRICES[delivery]} GEL`}
                     </span>
                   </div>
                 </div>

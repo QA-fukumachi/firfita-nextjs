@@ -124,6 +124,8 @@
     "stepDelivery": "7. მიტანა",
     "deliveryTbilisi": "თბილისის მასშტაბით",
     "deliveryRegions": "რეგიონებში",
+    "deliveryPickup": "ადგილიდან გატანა",
+    "free": "უფასო",
     "deliveryLabel": "მიტანა",
     "addrLabel": "დასახელება (მაგ: სახლი, სამსახური)",
     "addrRegion": "რეგიონი",

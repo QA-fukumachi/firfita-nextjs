@@ -31,6 +31,11 @@ describe('calculateTotal', () => {
     expect(DELIVERY_PRICES.regions).toBe(25);
   });
 
+  it('makes pickup free', () => {
+    expect(DELIVERY_PRICES.pickup).toBe(0);
+    expect(calculateTotal({ ...base, delivery: 'pickup' })).toBe(100);
+  });
+
   it('stacks delivery with per-unit surcharges', () => {
     const total = calculateTotal({
       ...base,
