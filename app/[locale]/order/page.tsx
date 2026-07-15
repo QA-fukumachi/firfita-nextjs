@@ -621,7 +621,7 @@ export default function OrderPage() {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                  <input
                    type="text"
-                   placeholder={`${t('addrLabel')} (${t('optional')})`}
+                   placeholder={t('addrLabel')}
                    value={deliveryAddress.label}
                    onChange={e => setDeliveryAddress(prev => ({ ...prev, label: e.target.value }))}
                    className="bg-transparent border-b py-3 outline-none transition-all text-base border-gray-300 focus:border-black placeholder-gray-400"
@@ -646,7 +646,7 @@ export default function OrderPage() {
                  )}
                  <input
                    type="text"
-                   placeholder={delivery === 'tbilisi' ? t('addrDistrict') : `${t('addrDistrict')} (${t('optional')})`}
+                   placeholder={t('addrDistrict')}
                    value={deliveryAddress.district}
                    onChange={e => setDeliveryAddress(prev => ({ ...prev, district: e.target.value }))}
                    className={`bg-transparent border-b py-3 outline-none transition-all text-base ${showErrors && delivery === 'tbilisi' && !deliveryAddress.district.trim() ? 'border-red-500 placeholder-red-300' : 'border-gray-300 focus:border-black placeholder-gray-400'}`}
@@ -674,7 +674,7 @@ export default function OrderPage() {
                  />
                  <input
                    type="text"
-                   placeholder={`${t('addrComment')} (${t('optional')})`}
+                   placeholder={t('addrComment')}
                    value={deliveryAddress.comment}
                    onChange={e => setDeliveryAddress(prev => ({ ...prev, comment: e.target.value }))}
                    className="bg-transparent border-b py-3 outline-none transition-all text-base border-gray-300 focus:border-black placeholder-gray-400 md:col-span-2"
