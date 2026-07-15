@@ -54,7 +54,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
     },
     icons: {
-      icon: '/icon.png?v=2',
+      icon: '/favicon.ico?v=3',
     },
   };
 }
