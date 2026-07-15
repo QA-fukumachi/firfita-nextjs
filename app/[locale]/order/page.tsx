@@ -7,6 +7,7 @@ import {
   getSleevePricing,
   DELIVERY_PRICES,
   EXPRESS_MAX_QUANTITY,
+  EXPRESS_PRICE,
   type Size as OrderSize,
   type Color as OrderColor,
   type ManufacturingTime,
@@ -39,7 +40,7 @@ function sendOrderNotification(order: Record<string, unknown>, paid: boolean) {
       'Quantity': order.quantity,
       'Outer Sleeve': order.outerSleeve ? `Yes (${order.outerSleeveLink})` : 'No',
       'Center Sticker': order.stickerType === 'custom' ? `Custom (${order.stickerLink})` : 'Firfita Default',
-      'Manufacturing': order.manufacturingTime === 'express' ? 'Express (24-48h)' : 'Standard (5-10 days)',
+      'Manufacturing': order.manufacturingTime === 'express' ? 'Express (24-48h, +100 GEL)' : 'Standard (5-10 days)',
       'Delivery': order.delivery === 'regions' ? 'Regions (+25 GEL)' : 'Tbilisi (+15 GEL)',
       'Delivery Address': [order.addrLabel, order.addrRegion, order.addrCity, order.addrDistrict, order.addrAddress]
         .filter(Boolean).join(', '),
@@ -170,6 +171,10 @@ export default function OrderPage() {
 
     if (color === 'Transparent' || color === 'Red') {
       total += 20 * parsedQty;
+    }
+
+    if (manufacturingTime === 'express') {
+      total += EXPRESS_PRICE;
     }
 
     if (delivery) {
@@ -590,7 +595,7 @@ export default function OrderPage() {
                  disabled={!expressAvailable}
                  className={`flex-1 py-4 px-6 border-2 transition-all font-display tracking-widest text-sm font-bold uppercase flex flex-col items-center justify-center ${!expressAvailable ? 'border-gray-200 text-gray-300 cursor-not-allowed' : manufacturingTime === 'express' ? 'border-black bg-black text-white' : 'border-gray-200 text-black hover:border-black'}`}
                >
-                 {t('manufacturingExpress')} <span className={`block text-xs font-normal lowercase mt-1 ${!expressAvailable ? 'text-gray-300' : manufacturingTime === 'express' ? 'text-white/80' : 'text-gray-500'}`}>{t('manufacturingExpressTime')}</span>
+                 {t('manufacturingExpress')} <span className={`block text-xs font-normal lowercase mt-1 ${!expressAvailable ? 'text-gray-300' : manufacturingTime === 'express' ? 'text-white/80' : 'text-gray-500'}`}>{t('manufacturingExpressTime')}</span> <span className={`block text-xs font-bold normal-case mt-1 ${!expressAvailable ? 'text-gray-300' : manufacturingTime === 'express' ? 'text-white/80' : 'text-gray-500'}`}>(+{EXPRESS_PRICE} GEL)</span>
                </button>
              </div>
              {!expressAvailable && (
@@ -796,6 +801,24 @@ export default function OrderPage() {
                   <div className="flex flex-col items-end shrink-0 pl-2">
                     <span className="font-display text-lg font-bold text-white">
                       + {(20 * parsedQty).toLocaleString('en-US').replace(/,/g, ' ')} GEL
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {manufacturingTime === 'express' && (
+                <div className="flex items-start justify-between mt-4 gap-4 w-full">
+                  <div className="flex flex-col min-w-0 flex-1 gap-1">
+                    <span className="font-display font-bold text-white text-base md:text-lg break-words leading-tight">
+                      {t('manufacturingExpress')}
+                    </span>
+                    <span className="font-display text-gray-400 text-sm">
+                      {t('manufacturingExpressTime')}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-end shrink-0 pl-2">
+                    <span className="font-display text-lg font-bold text-white">
+                      + {EXPRESS_PRICE} GEL
                     </span>
                   </div>
                 </div>

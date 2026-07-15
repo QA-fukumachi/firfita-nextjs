@@ -19,6 +19,8 @@ export const COLOR_SURCHARGE = 20;
 export const DELIVERY_PRICES: Record<Delivery, number> = { tbilisi: 15, regions: 25 };
 // Express manufacturing (24-48h) is only possible for small runs.
 export const EXPRESS_MAX_QUANTITY = 2;
+// Flat express manufacturing surcharge in GEL, not per unit.
+export const EXPRESS_PRICE = 100;
 
 export interface TierPrice {
   base: number;
@@ -70,6 +72,7 @@ export interface OrderSpec {
   quantity: number;
   stickerType: StickerType;
   outerSleeve: boolean;
+  manufacturingTime: ManufacturingTime;
   delivery: Delivery;
 }
 
@@ -88,6 +91,10 @@ export function calculateTotal(spec: OrderSpec): number {
 
   if (spec.color === 'Transparent' || spec.color === 'Red') {
     total += COLOR_SURCHARGE * spec.quantity;
+  }
+
+  if (spec.manufacturingTime === 'express') {
+    total += EXPRESS_PRICE;
   }
 
   total += DELIVERY_PRICES[spec.delivery];

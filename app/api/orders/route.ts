@@ -118,7 +118,7 @@ export async function POST(request: Request) {
 
   // Authoritative pricing — the client never sends amounts.
   const unitPrice = getVinylPricing(size, quantity).current;
-  const totalPrice = calculateTotal({ size, color, quantity, stickerType, outerSleeve, delivery });
+  const totalPrice = calculateTotal({ size, color, quantity, stickerType, outerSleeve, manufacturingTime, delivery });
 
   // When Flitt credentials are configured the order goes through online
   // payment; otherwise it falls back to the original email-only flow.

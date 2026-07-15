@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { calculateTotal, DELIVERY_PRICES, EXPRESS_MAX_QUANTITY, type OrderSpec } from './pricing';
+import {
+  calculateTotal,
+  DELIVERY_PRICES,
+  EXPRESS_MAX_QUANTITY,
+  EXPRESS_PRICE,
+  type OrderSpec,
+} from './pricing';
 
 const base: OrderSpec = {
   size: '12',
@@ -7,6 +13,7 @@ const base: OrderSpec = {
   quantity: 1,
   stickerType: 'default',
   outerSleeve: false,
+  manufacturingTime: 'standard',
   delivery: 'tbilisi',
 };
 
@@ -38,5 +45,13 @@ describe('calculateTotal', () => {
 
   it('keeps the express quantity limit at 2', () => {
     expect(EXPRESS_MAX_QUANTITY).toBe(2);
+  });
+
+  it('adds a flat express manufacturing fee, not per unit', () => {
+    expect(EXPRESS_PRICE).toBe(100);
+    // 100 (vinyl) + 100 (express) + 15 (delivery)
+    expect(calculateTotal({ ...base, manufacturingTime: 'express' })).toBe(215);
+    // 2 * 100 + 100 + 15 — fee does not scale with quantity
+    expect(calculateTotal({ ...base, manufacturingTime: 'express', quantity: 2 })).toBe(315);
   });
 });
