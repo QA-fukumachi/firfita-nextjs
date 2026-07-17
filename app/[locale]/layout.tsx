@@ -36,6 +36,7 @@ export async function generateMetadata({
       template: `%s — ${t('siteName')}`,
     },
     description: t('home.description'),
+    icons: { icon: '/icon.png' },
     alternates: localeAlternates(locale, ''),
     openGraph: {
       type: 'website',
