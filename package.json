@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "pages:build": "next-on-pages && node scripts/patch-worker.mjs",
+    "pages:preview": "wrangler pages dev .vercel/output/static --compatibility-flag=nodejs_compat",
     "lint": "eslint",
     "test": "vitest run",
     "tbc:types": "openapi-typescript .agent/skills/tbc-payments/openapi.yaml -o src/lib/tbc/types.ts",
