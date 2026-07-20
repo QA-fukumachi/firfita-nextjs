@@ -196,7 +196,7 @@ export default function Home() {
         <div className="flex flex-col gap-1 font-display text-xl md:text-2xl lg:text-3xl tracking-widest break-words">
           <a href={`mailto:${t('contact.email')}`} className="hover:opacity-80 transition-opacity">{t('contact.email')}</a>
           <a href={`tel:${t('contact.phone')}`} className="hover:opacity-80 transition-opacity">{t('contact.phone')}</a>
-          <span className="text-lg md:text-xl lg:text-2xl mt-4 opacity-80">{t('contact.address')}</span>
+          <span className="text-lg md:text-xl lg:text-2xl mt-4">{t('contact.address')}</span>
         </div>
       </section>
 
