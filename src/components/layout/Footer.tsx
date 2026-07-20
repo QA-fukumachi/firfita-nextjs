@@ -1,10 +1,16 @@
-export function Footer() {
+import { getTranslations } from 'next-intl/server';
+
+export async function Footer() {
   const year = new Date().getFullYear();
+  const t = await getTranslations('Footer');
 
   return (
     <footer className="w-full py-8 px-6 flex flex-col md:flex-row items-center justify-between border-t border-surface/50 text-sm text-muted font-display tracking-wider mt-auto gap-4 md:gap-0">
-      <div>© {year} FIRFITA. All rights reserved.</div>
-      
+      <div className="flex flex-col items-center md:items-start gap-1">
+        <div>© {year} FIRFITA. {t('rights')}</div>
+        <div>{t('companyId')}</div>
+      </div>
+
       <div className="flex gap-6 items-center">
         <div className="flex gap-4">
           <a href="https://www.instagram.com/__firfita?igsh=MThpcmcwb29mNTlkaw==" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
@@ -14,7 +20,8 @@ export function Footer() {
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
           </a>
         </div>
-        <a href="/terms-and-conditions.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Terms & Conditions</a>
+        <a href="/Firfita_Privacy_Policy_EN_KA.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">{t('privacy')}</a>
+        <a href="/Firfita_Terms_and_Conditions_EN_KA.pdf" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">{t('terms')}</a>
       </div>
     </footer>
   );

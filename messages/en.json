@@ -28,6 +28,12 @@
     "pricing": "PRICING",
     "orderNow": "ORDER NOW"
   },
+  "Footer": {
+    "rights": "All rights reserved.",
+    "companyId": "Company ID: 400432028",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy"
+  },
   "Home": {
     "heroSubtitle": "CUSTOM CUTTING SERVICE",
     "startOrder": "START YOUR ORDER",
