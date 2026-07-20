@@ -6,10 +6,7 @@ export async function Footer() {
 
   return (
     <footer className="w-full py-8 px-6 flex flex-col md:flex-row items-center justify-between border-t border-surface/50 text-sm text-muted font-display tracking-wider mt-auto gap-4 md:gap-0">
-      <div className="flex flex-col items-center md:items-start gap-1">
-        <div>© {year} FIRFITA. {t('rights')}</div>
-        <div>{t('companyId')}</div>
-      </div>
+      <div>© {year} FIRFITA. {t('rights')} · {t('companyId')}</div>
 
       <div className="flex gap-6 items-center">
         <div className="flex gap-4">
